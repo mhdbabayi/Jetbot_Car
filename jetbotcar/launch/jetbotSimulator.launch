@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- Listen to messages from joysicks -->
+  <node pkg="joy" name="joy_node" type="joy_node"/>
+
+  <!-- Launch a map from the maps folder-->
+  <arg name="map" default="$(find jetbotcar)/maps/levine.yaml"/>
+  <node pkg="map_server" name="map_server" type="map_server" args="$(arg map)"/>
+
+  <!-- Launch the racecar model -->
+  <include file="$(find jetbotcar)/launch/racecar_model.launch"/>
+
+  <!-- Begin the simulator with the parameters from params.yaml -->
+  <node pkg="jetbotcar" name="jetbot_simulator" type="jetbotSimulator" output="screen">
+    <rosparam command="load" file="$(find jetbotcar)/params.yaml"/>
+  </node>
+  
+  <node pkg="jetbotcar" name="jetDriver" type="jetbotDrivePublisher" output="screen">
+    <rosparam command="load" file="$(find jetbotcar)/params.yaml"/>
+  </node>
+
+  
+
+  <!-- Launch the behavior controller node with the parameters from params.yaml -->
+  <!--node pkg="jetbotcar" name="behavior_controller" type="behavior_controller" output="screen">
+    <rosparam command="load" file="$(find jetbotcar)/params.yaml"/>
+  </node-->
+
+  <!-- Launch the Random Walker Node -->
+  <!--node pkg="jetbotcar" name="random_walker" type="random_walk" output="screen">
+    <rosparam command="load" file="$(find jetbotcar)/params.yaml"/>
+  </node-->
+
+  <!-- Launch the Keyboard Node -->
+  <node pkg="jetbotcar" name="keyboard" type="keyboard" output="screen">
+    <rosparam command="load" file="$(find jetbotcar)/params.yaml"/>
+  </node>
+
+  <!-- ***Put launch command for new planner here:-->
+  <!-- Launch the New Planner Node -->
+  <!--   <node pkg="jetbotcar" name="new node's name" type="new file name" output="screen">
+          <rosparam command="load" file="$(find jetbotcar)/params.yaml"/>
+  	 </node>    -->
+
+  
+  <!-- Launch RVIZ -->
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find jetbotcar)/launch/simulator.rviz" output="screen"/>
+</launch>
