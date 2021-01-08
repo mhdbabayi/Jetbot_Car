@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import rospy
 import time 
 from Adafruit_MotorHAT import Adafruit_MotorHAT
@@ -27,7 +29,7 @@ def set_speed(motor_ID, value):
 def all_stop():
 	motor_left.setSpeed(0)
 	motor_right.setSpeed(0)
-
+    
 	motor_left.run(Adafruit_MotorHAT.RELEASE)
 	motor_right.run(Adafruit_MotorHAT.RELEASE)
 
@@ -39,7 +41,7 @@ def driveCallback(msg):
 
     rightMotorSpeedRef = max(-1.0 , (min(1 ,msg.right)))
     leftMotorSpeedRef  = max(-1.0 , (min(1 , msg.left)))
-
+    
 	set_speed(motor_left_ID,  leftMotorSpeedRef)
 	set_speed(motor_right_ID,  rightMotorSpeedRef) 
 

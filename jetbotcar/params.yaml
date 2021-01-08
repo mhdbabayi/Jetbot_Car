@@ -115,6 +115,7 @@ keyboard_topic: "/key"
 brake_bool_topic: "/brake_bool"
 mux_topic: "/mux"
 print_topic : "/print_topic"
+radius_topic : "/radius"
 
 # Topic names of various drive channels
 rand_drive_topic: "/rand_drive"
