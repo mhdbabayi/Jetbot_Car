@@ -11,9 +11,9 @@ def set_speed(motor_ID, value):
     speed = int(min(max(abs(value*max_pwm), 0), max_pwm))
 
     if motor_ID == 1:
-        motor = motor_left
-    elif motor_ID == 2:
         motor = motor_right
+    elif motor_ID == 2:
+        motor = motor_left
     else:
         rospy.logerror('set_speed(%d, %f) -> invalid motor_ID = %d', motor_ID, value, motor_ID)
         return
@@ -37,7 +37,8 @@ def all_stop():
 
 # simple string commands (left/right/forward/backward/stop)
 def driveCallback(msg):
-	rospy.loginfo(rospy.get_caller_id() + ' cmd_str=%s', msg.data)
+	#rospy.loginfo(rospy.get_caller_id() + ' cmd_str=%s', msg.data)
+    rospy.loginfo('left wheel speed command : %f \n right wheel speed command: %f\n', msg.left, msg.right)
 
     rightMotorSpeedRef = max(-1.0 , (min(1 ,msg.right)))
     leftMotorSpeedRef  = max(-1.0 , (min(1 , msg.left)))
@@ -59,9 +60,11 @@ if __name__ == "__main__":
 
     all_stop()
     
+    drive_topic = rospy.get_param("diff_drive_topic")
+    
     rospy.init_node('motorDriveNode')
 
-    rospy.Subscriber('~driveCallback', Jetdrivemsg, driveCallback)
+    rospy.Subscriber(drive_topic, Jetdrivemsg, driveCallback)
 
     rospy.spin()
 

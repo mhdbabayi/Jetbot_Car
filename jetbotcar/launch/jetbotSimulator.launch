@@ -5,6 +5,7 @@
 
   <!-- Launch a map from the maps folder-->
   <arg name="map" default="$(find jetbotcar)/maps/levine.yaml"/>
+  <arg name="run_the_robot" default=false/>
   <node pkg="map_server" name="map_server" type="map_server" args="$(arg map)"/>
 
   <!-- Launch the racecar model -->
@@ -19,28 +20,20 @@
     <rosparam command="load" file="$(find jetbotcar)/params.yaml"/>
   </node>
 
-  
+  <group if="$(arg run_the_robot)">
+    <node pkg="jetbotcar" name="motorDriveNode" type="motorDrive.py" output="screen">
+      <rosparam command="load" file="$(find jetbotcar)/paramas.yaml"/>
+    </node>
+  </group>
 
-  <!-- Launch the behavior controller node with the parameters from params.yaml -->
-  <!--node pkg="jetbotcar" name="behavior_controller" type="behavior_controller" output="screen">
-    <rosparam command="load" file="$(find jetbotcar)/params.yaml"/>
-  </node-->
 
-  <!-- Launch the Random Walker Node -->
-  <!--node pkg="jetbotcar" name="random_walker" type="random_walk" output="screen">
-    <rosparam command="load" file="$(find jetbotcar)/params.yaml"/>
-  </node-->
+
 
   <!-- Launch the Keyboard Node -->
   <node pkg="jetbotcar" name="keyboard" type="keyboard" output="screen">
     <rosparam command="load" file="$(find jetbotcar)/params.yaml"/>
   </node>
 
-  <!-- ***Put launch command for new planner here:-->
-  <!-- Launch the New Planner Node -->
-  <!--   <node pkg="jetbotcar" name="new node's name" type="new file name" output="screen">
-          <rosparam command="load" file="$(find jetbotcar)/params.yaml"/>
-  	 </node>    -->
 
   
   <!-- Launch RVIZ -->
