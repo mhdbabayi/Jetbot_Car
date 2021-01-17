@@ -4,7 +4,7 @@ import rospy
 import time 
 from Adafruit_MotorHAT import Adafruit_MotorHAT
 from std_msgs.msg import String
-from Jetdrivemsg import Jetdrivemsg
+from jetbotcar.msg import Jetdrivemsg
 
 def set_speed(motor_ID, value):
     max_pwm = 115.0
@@ -43,10 +43,10 @@ def driveCallback(msg):
     rightMotorSpeedRef = max(-1.0 , (min(1 ,msg.right)))
     leftMotorSpeedRef  = max(-1.0 , (min(1 , msg.left)))
     
-	set_speed(motor_left_ID,  leftMotorSpeedRef)
-	set_speed(motor_right_ID,  rightMotorSpeedRef) 
+    set_speed(motor_left_ID,  leftMotorSpeedRef)
+    set_speed(motor_right_ID,  rightMotorSpeedRef)
 
- 
+
 
 
 if __name__ == "__main__":
