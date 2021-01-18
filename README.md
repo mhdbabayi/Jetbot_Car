@@ -1,5 +1,5 @@
 # Cranfield Jetbot 
-This repository contains codes that can run the both the RVIZ simulator and the robot. 
+This repository contains code that can run both the RVIZ simulator and the robot. 
 
 The simulator original code is taken from:
 
