@@ -59,10 +59,9 @@ if __name__ == "__main__":
     motor_right = motor_driver.getMotor(motor_right_ID)
 
     all_stop()
-    
-    drive_topic = rospy.get_param("diff_drive_topic")
-    
     rospy.init_node('motorDriveNode')
+    
+    drive_topic = rospy.get_param("/motorDriveNode/diff_drive_topic")
 
     rospy.Subscriber(drive_topic, Jetdrivemsg, driveCallback)
 
