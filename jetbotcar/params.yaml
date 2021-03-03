@@ -28,10 +28,8 @@ jetbot_max_wheel_torque: 0.6 #N/m
 jetbot_motor_timeConstant: 0.4 #seconds
 jetbot_wheel_radius: 0.05 #meters
 jetbot_mass: 0.5 #kg
-#jetbot_width: 0.1 #meters
-#jetbot_length: 0.2 #meters
-jetbot_width: 0.097 #meters
-jetbot_length: 0.128 #meters
+jetbot_width: 0.1 #meters
+jetbot_length: 0.2 #meters 
 jetbot_wheel_damping: 0.1 # damping factor to slow down the wheels when no torque is applied 
 angular_velocity_threshold: 0.1 # threshold to avoid singular turn radius in dynamics  
 # The rate at which the pose and the lidar publish

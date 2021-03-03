@@ -101,12 +101,12 @@ public:
         }
         if (publish){
             publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
-        }else if(msg.data == "e"){ // E-Stop setting
+        }else if(msg.data == "e"){
             leftWheelSpeed = 0.0;
             rightWheelSpeed = 0.0;
             publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
-            exit(0); 
-        }
+            exit(0);
+        }    
     }
    
 };
