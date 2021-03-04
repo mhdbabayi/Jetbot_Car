@@ -94,8 +94,9 @@ public:
         }else if(msg.data == "q"){
             leftWheelSpeed =   constantRadiusLeftWheelSpeed;
             rightWheelSpeed =  constantRadiusRightWheelSpeed;
-        }else if(msg.data == "l"){
-            
+        }else if(msg.data == "o"){
+            leftWheelSpeed = 0.8*rotationWheelSpeedScale;
+            rightWheelSpeed = 1.1*rotationWheelSpeedScale;
         }else{
             publish = false; // no action while pressing other
         }
