@@ -3,6 +3,9 @@
 #include <std_msgs/Float64MultiArray.h>
 #include <std_msgs/Float64.h>
 #include <std_msgs/String.h>
+#include <chrono>
+#include <iostream>
+#include <cstdlib>
 //#include "~/newJetpackage/devel/include/jetbotcar/jetdrivemsg.h"
 #include "jetbotcar/Jetdrivemsg.h"
 class jetbotDriveCmd
@@ -31,7 +34,7 @@ public:
         std::string diff_drive_topic, mux_topic, joy_topic, key_topic , radiusTopic;
 	    n.getParam("diff_drive_topic", diff_drive_topic);
         n.getParam("keyboard_topic", key_topic);
-        n.getParam("jetbot_rotation_wheel_speed_scale", rotationWheelSpeedScale);
+        n.getParam("jetbot_rotation_wheel_speed_scale", rotationWheelSpeedScale); // rotationWheelSpeedScale = 0.5
         n.getParam("jetbot_width", trackWidth);
         n.getParam("radius_topic" , radiusTopic);
 
@@ -94,14 +97,28 @@ public:
         }else if(msg.data == "q"){
             leftWheelSpeed =   constantRadiusLeftWheelSpeed;
             rightWheelSpeed =  constantRadiusRightWheelSpeed;
-        }else if(msg.data == "o"){
+        }else if(msg.data == "o"){ //open loop drive in a circle
             leftWheelSpeed = 0.8*rotationWheelSpeedScale;
             rightWheelSpeed = 1.1*rotationWheelSpeedScale;
+        }else if(msg.data == "l"){
+            std::chrono::milliseconds ms(3000);
+            std::chrono::time_point<std::chrono::system_clock> end;
+            end = std::chrono::system_clock::now() + ms;
+            for(;;){
+                if(std::chrono::system_clock::now() < end){
+                    leftWheelSpeed = 1.0;
+                    rightWheelSpeed = 1.0;
+                }else{
+                    continue;
+                }
+
+            }
+
         }else{
             publish = false; // no action while pressing other
         }
-        if (publish){
-            publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
+        if (publish){ // transmit speed command to left and right motors
+            publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed); 
         }else if(msg.data == "e"){
             leftWheelSpeed = 0.0;
             rightWheelSpeed = 0.0;
