@@ -6,8 +6,12 @@
 #include <chrono>
 #include <iostream>
 #include <cstdlib>
+#include <unistd.h>
 //#include "~/newJetpackage/devel/include/jetbotcar/jetdrivemsg.h"
 #include "jetbotcar/Jetdrivemsg.h"
+
+using namespace std;
+
 class jetbotDriveCmd
 {
 private:
@@ -40,7 +44,17 @@ public:
 
 
         //diff_drive_pub = n.advertise<std_msgs::Float64MultiArray>(diff_drive_topic, 10);
+        // jetbot:jetdrivemsg: templete including type of message
         diff_drive_pub = n.advertise<jetbotcar::Jetdrivemsg>(diff_drive_topic , 10);
+
+        // The second parameter is the size of the message queue,
+        // If messages are arriving faster than they are being processed, this
+        // is the number of messages that will be buffered up before beginning to throw
+        // away the oldest ones.
+
+        // key_sub is the subscriber, and subscribe the topic named "key_topic"
+        // radius_sub is the subscriber, and subscribe the topic named "radius_sub"
+        // follow & is the address of 
         key_sub = n.subscribe(key_topic, 1, &jetbotDriveCmd::key_callback, this);
         radius_sub = n.subscribe(radiusTopic , 1, &jetbotDriveCmd::radiusCalc, this);
 
@@ -100,19 +114,19 @@ public:
         }else if(msg.data == "o"){ //open loop drive in a circle
             leftWheelSpeed = 0.8*rotationWheelSpeedScale;
             rightWheelSpeed = 1.1*rotationWheelSpeedScale;
-        }else if(msg.data == "l"){
-            std::chrono::milliseconds ms(3000);
-            std::chrono::time_point<std::chrono::system_clock> end;
-            end = std::chrono::system_clock::now() + ms;
-            for(;;){
-                if(std::chrono::system_clock::now() < end){
-                    leftWheelSpeed = 1.0;
-                    rightWheelSpeed = 1.0;
-                }else{
-                    continue;
-                }
-
-            }
+        }else if(msg.data == "l"){ //just measure the time and forward rather than use the loop
+            // std::chrono::milliseconds ms(3000);
+            // std::chrono::time_point<std::chrono::system_clock> end;
+            // end = std::chrono::system_clock::now() + ms;
+            
+            // std::chrono::system_clock::now() < end
+            leftWheelSpeed = 1.0;
+            rightWheelSpeed = 1.0;
+            publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
+            sleep(3); // run the Jetbot for 3 s.
+            leftWheelSpeed = 0;
+            rightWheelSpeed = 0;
+            
 
         }else{
             publish = false; // no action while pressing other
