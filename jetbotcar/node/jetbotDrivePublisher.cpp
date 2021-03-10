@@ -120,29 +120,50 @@ public:
             // end = std::chrono::system_clock::now() + ms;
             
             // std::chrono::system_clock::now() < end
-            leftWheelSpeed = 1.0;
-            rightWheelSpeed = 1.0;
+            leftWheelSpeed = 0.5;
+            rightWheelSpeed = 0.5;
             publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
-            sleep(3); // run the Jetbot for 3 s.
+            sleep(10); // run the Jetbot for 10 s.
             leftWheelSpeed = 0;
             rightWheelSpeed = 0;
-            
-
+            // if(msg.data == "e"){ // set e-stop inside the predefined loop
+            //     leftWheelSpeed = 0.0;
+            //     rightWheelSpeed = 0.0;
+            //     publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
+            //     exit(0);
+            // }else if {
+            //     leftWheelSpeed = 0.5;
+            //     rightWheelSpeed = 0.5;
+            //     publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
+            //     sleep(10); // run the Jetbot for 10 s.
+            //     leftWheelSpeed = 0;
+            //     rightWheelSpeed = 0;
+            }
+    
         }else if(msg.data == "u"){
-            leftWheelSpeed = 1.0;
-            rightWheelSpeed = 1.0;
-            publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
-            sleep(2);
-            leftWheelSpeed = 1.0*rotationWheelSpeedScale;
-            rightWheelSpeed = -1.0*rotationWheelSpeedScale;
-            publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
-            sleep(1);
-            leftWheelSpeed = 1.0;
-            rightWheelSpeed = 1.0;
-            publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
-            sleep(2);
-            leftWheelSpeed = 0.0;
-            rightWheelSpeed = 0.0;
+
+            if(msg.data == "e"){ // set e-stop inside the predefined loop
+                leftWheelSpeed = 0.0;
+                rightWheelSpeed = 0.0;
+                publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
+                exit(0);
+            }else if {
+                leftWheelSpeed = 1.0;
+                rightWheelSpeed = 1.0;
+                publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
+                sleep(10);
+                leftWheelSpeed = 1.0*rotationWheelSpeedScale;
+                rightWheelSpeed = -1.0*rotationWheelSpeedScale;
+                publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
+                sleep(1);
+                leftWheelSpeed = 1.0;
+                rightWheelSpeed = 1.0;
+                publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
+                sleep(4);
+                leftWheelSpeed = 0.0;
+                rightWheelSpeed = 0.0;
+            }
+
         }else{
             publish = false; // no action while pressing other
         }
