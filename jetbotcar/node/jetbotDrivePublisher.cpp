@@ -128,6 +128,21 @@ public:
             rightWheelSpeed = 0;
             
 
+        }else if(msg.data == "u"){
+            leftWheelSpeed = 1.0;
+            rightWheelSpeed = 1.0;
+            publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
+            sleep(2);
+            leftWheelSpeed = 1.0*rotationWheelSpeedScale;
+            rightWheelSpeed = -1.0*rotationWheelSpeedScale;
+            publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
+            sleep(1);
+            leftWheelSpeed = 1.0;
+            rightWheelSpeed = 1.0;
+            publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
+            sleep(2);
+            leftWheelSpeed = 0.0;
+            rightWheelSpeed = 0.0;
         }else{
             publish = false; // no action while pressing other
         }
