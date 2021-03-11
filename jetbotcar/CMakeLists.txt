@@ -50,6 +50,7 @@ catkin_python_setup()
  add_message_files(
    FILES
    Jetdrivemsg.msg
+   jetRacerDriveMsg.msg
  )
 
 generate_messages(
