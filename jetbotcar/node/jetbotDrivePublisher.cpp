@@ -3,9 +3,10 @@
 #include <std_msgs/Float64MultiArray.h>
 #include <std_msgs/Float64.h>
 #include <std_msgs/String.h>
-//#include "~/newJetpackage/devel/include/jetbotcar/jetdrivemsg.h"
+
 #include "jetbotcar/Jetdrivemsg.h"
-class jetbotDriveCmd
+#include "jetbotcar/jetRacerDriveMsg.h"
+class jetracerDriveCmd
 {
 private:
     ros::NodeHandle n;
@@ -14,8 +15,10 @@ private:
     ros::Subscriber key_sub;
 
     ros::Publisher diff_drive_pub;
-
+    ros::Publisher jetracer_drive_pub
+    
     ros::Subscriber radius_sub;
+
 
     double prev_key_velocity = 0.0;
     double keyboard_max_speed = 1.0;
@@ -24,25 +27,29 @@ private:
     double constantRadiusLeftWheelSpeed, constantRadiusRightWheelSpeed;
 
 public:
-    jetbotDriveCmd()
+    jetracerDriveCmd()
     {
         n = ros::NodeHandle("~");
 
-        std::string diff_drive_topic, mux_topic, joy_topic, key_topic , radiusTopic;
+        std::string diff_drive_topic, mux_topic, joy_topic, key_topic , radiusTopic, jetracer_drive_topic;
 	    n.getParam("diff_drive_topic", diff_drive_topic);
+        n.getParam("jetracer_drive_topic", jetracer_drive_topic);
         n.getParam("keyboard_topic", key_topic);
         n.getParam("jetbot_rotation_wheel_speed_scale", rotationWheelSpeedScale);
         n.getParam("jetbot_width", trackWidth);
         n.getParam("radius_topic" , radiusTopic);
 
 
-        //diff_drive_pub = n.advertise<std_msgs::Float64MultiArray>(diff_drive_topic, 10);
+        
         diff_drive_pub = n.advertise<jetbotcar::Jetdrivemsg>(diff_drive_topic , 10);
+        jetracer_drive_pub = n.advertise<jetbotcar::jetRacerDriveMsg>(jetracer_drive_topic, 10);
+
         key_sub = n.subscribe(key_topic, 1, &jetbotDriveCmd::key_callback, this);
         radius_sub = n.subscribe(radiusTopic , 1, &jetbotDriveCmd::radiusCalc, this);
 
     }
 
+    // this fucntion has to be rewritten for jetracer
     void radiusCalc(const std_msgs::Float64 & msg){
         if (msg.data > 0){
             constantRadiusRightWheelSpeed = 1;
@@ -54,60 +61,64 @@ public:
         ROS_INFO("turn radius topic read");
 
     }
-    void publish_to_diff_drive(double rightWheelTrq,double leftWheelTrq)
+    /*void publish_to_diff_drive(double rightWheelTrq,double leftWheelTrq)
     {
-        /*std_msgs::Float64MultiArray diffDriveMsg;
-	diffDriveMsg.data.clear();
-	diffDriveMsg.data.push_back(rightWheelTrq);
-	diffDriveMsg.data.push_back(leftWheelTrq);
-        diff_drive_pub.publish(diffDriveMsg);*/
+        
         jetbotcar::Jetdrivemsg diffdrivemsg;
         diffdrivemsg.left = leftWheelTrq;
         diffdrivemsg.right  = rightWheelTrq;
         diff_drive_pub.publish(diffdrivemsg);
+    }*/
+    void publishtoJetracer(double throttle, double steering){
+        jetbotcar::jetRacerDriveMsg jetracerMsg
+        jetracerMsg.throttle = throttle;
+        jetracerMsg.steering = steering;
+        jetracer_drive_pub.publish(jetracerMsg);
     }
 
     void key_callback(const std_msgs::String & msg){
-        double leftWheelSpeed;
-        double rightWheelSpeed;
+        /*double leftWheelSpeed;
+        double rightWheelSpeed;*/
+        double throttle;
+        double steering;
 
         bool publish = true;
 
         if (msg.data == "w"){
-            leftWheelSpeed = 1.0;
-            rightWheelSpeed = 1.0;
+            throttle = 1.0;
+            steering = 0.0;
         
         }else if(msg.data=="s"){
-            leftWheelSpeed = -1.0;
-            rightWheelSpeed = -1.0;
+            throttel = -1.0;
+            steering = 0;
 
         }else if(msg.data == "a"){
-            leftWheelSpeed = -1.0*rotationWheelSpeedScale;
-            rightWheelSpeed = 1.0*rotationWheelSpeedScale;
+            throttel = 0.0;
+            steering = 0.5;
 
         }else if(msg.data == "d") {
-            leftWheelSpeed = 1.0*rotationWheelSpeedScale;
-            rightWheelSpeed = -1.0*rotationWheelSpeedScale;
+            throttel = 0.0;
+            steering = -0.5;
         }else if (msg.data ==" "){
-            leftWheelSpeed = 0.0;
-            rightWheelSpeed = 0.0;
+            throttle = 0.0;
+            steering = 0.0;
         }else if(msg.data == "q"){
-            leftWheelSpeed =   constantRadiusLeftWheelSpeed;
-            rightWheelSpeed =  constantRadiusRightWheelSpeed;
+            throttle =   0.5;
+            steering =  0.5;
         }
         else {
             publish = false;
         }
         if (publish){
-            publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
+            publishtoJetracer(throttle , steering);
 
         }
     }
    
 };
 int main(int argc, char ** argv){
-  ros::init(argc, argv, "jetbotDriveCmd");
-  jetbotDriveCmd jetDriver;
+  ros::init(argc, argv, "jetRacerDriveCmd");
+  jetracerDriveCmd jetDriver;
   ros::spin();
   return 0;
   }

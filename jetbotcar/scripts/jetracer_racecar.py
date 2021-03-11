@@ -1,6 +1,7 @@
 
 from adafruit_servokit import ServoKit 
 from jetbotcar.msg import Jetdrivemsg
+from jetbotcar.msg import jetRacerDriveMsg
 import rospy
 import time
 
@@ -19,19 +20,22 @@ class jetracer:
         self.motor._pca.frequency = 1600
         self.steering_motor = self.kit.continuous_servo[self.steering_channel]
         rospy.init_node('jetracerLowLevel')
-        #self.speedCommandTopic = rospy.get_param("/motorDriveNode/motorSpeedTopic")
-        self.speedCommandTopic = 'diff_drive'
-	#self.steeringCommandTopic = rospy.get_param("motorDriveNode/steeringCommandTopic")
+        	
+        self.driveTopic = rospy.get_param("/jetRacerDriveNode/jetracer_drive_topic")
+        self.commandSub = rospy.Subscriber(self.driveTopic,jetRacerDriveMsg, self.driveCallBack)
+        
 
-        self.speedSub = rospy.Subscriber(self.speedCommandTopic, Jetdrivemsg, self.on_throttle)
-        self.steeringSub = rospy.Subscriber(self.speedCommandTopic, Jetdrivemsg, self.on_steering)
+    
+    def driveCallBack(self, msg):
+        steeringCmd = max(min(msg.steerig , 1.0), -1.0)
+        throttleCmd = max(min(msg.throttle , 1.0), -1.0)
+        self.on_steering(steeringCmd)
+        self.on_throttle(throttleCmd)
 
-    def on_steering(self, msg):
-        steering_angle_cmd = msg.right
+    def on_steering(self, steering_angle_cmd):
         self.steering_motor.throttle = steering_angle_cmd*self.steering_gain + self.steering_offset
 
-    def on_throttle(self, msg):
-        throttleValue = msg.right
+    def on_throttle(self, throttleValue):
         if throttleValue > 0:
             self.motor._pca.channels[0].duty_cycle = int(0xFFFF * (throttleValue * self.throttle_gain))
             self.motor._pca.channels[1].duty_cycle = 0xFFFF
@@ -50,3 +54,6 @@ class jetracer:
             self.motor._pca.channels[7].duty_cycle = int(-0xFFFF * (throttleValue * self.throttle_gain))
             self.motor._pca.channels[6].duty_cycle = 0
             self.motor._pca.channels[5].duty_cycle = 0xFFFF
+    
+    
+
