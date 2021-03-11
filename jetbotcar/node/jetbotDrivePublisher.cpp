@@ -7,8 +7,11 @@
 #include <iostream>
 #include <cstdlib>
 #include <unistd.h>
+#include <time.h>
 //#include "~/newJetpackage/devel/include/jetbotcar/jetdrivemsg.h"
 #include "jetbotcar/Jetdrivemsg.h"
+#include <iostream>
+#include <cstdio>
 
 using namespace std;
 
@@ -23,6 +26,8 @@ private:
     ros::Publisher diff_drive_pub;
 
     ros::Subscriber radius_sub;
+
+    ros::Subscriber e_stop_sub; //subscriber for the e-stop button
 
     double prev_key_velocity = 0.0;
     double keyboard_max_speed = 1.0;
@@ -57,7 +62,7 @@ public:
         // follow & is the address of 
         key_sub = n.subscribe(key_topic, 1, &jetbotDriveCmd::key_callback, this);
         radius_sub = n.subscribe(radiusTopic , 1, &jetbotDriveCmd::radiusCalc, this);
-
+        e_stop_sub = n.subscribe(key_topic, 1, &jetbotDriveCmd::e_stop, this);
     }
 
     void radiusCalc(const std_msgs::Float64 & msg){
@@ -84,10 +89,21 @@ public:
         diff_drive_pub.publish(diffdrivemsg);
     }
 
+    void e_stop(const std_msgs::String & msg){
+        double leftWheelSpeed;
+        double rightWheelSpeed;
+        if (msg.data == "h"){
+            // leftWheelSpeed = 0.0;
+            // rightWheelSpeed = 0.0;
+            // publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
+            // exit(0);
+            ros::shutdown();
+        }
+    }
+
     void key_callback(const std_msgs::String & msg){
         double leftWheelSpeed;
         double rightWheelSpeed;
-
         bool publish = true;
 
         if (msg.data == "w"){
@@ -115,38 +131,56 @@ public:
             leftWheelSpeed = 0.8*rotationWheelSpeedScale;
             rightWheelSpeed = 1.1*rotationWheelSpeedScale;
         }else if(msg.data == "l"){ //just measure the time and forward rather than use the loop
-            // std::chrono::milliseconds ms(3000);
-            // std::chrono::time_point<std::chrono::system_clock> end;
-            // end = std::chrono::system_clock::now() + ms;
-            
-            // std::chrono::system_clock::now() < end
-            leftWheelSpeed = 1.0;
-            rightWheelSpeed = 1.0;
-            publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
-            sleep(3); // run the Jetbot for 3 s.
-            leftWheelSpeed = 0;
-            rightWheelSpeed = 0;
-            
+            clock_t start, end;
+            start = clock();
+            leftWheelSpeed = 0.5;
+            rightWheelSpeed = 0.5;
+            end = clock();
+            cout << " the start time is " <<(double)(start) / CLOCKS_PER_SEC << "s" << endl;
+
+            if((double(end - start) / CLOCKS_PER_SEC) > 5){
+                leftWheelSpeed = 0;
+                rightWheelSpeed = 0;
+                publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
+            }
+            // auto begin = std::chrono::high_resolution_clock::now();
+
+            // leftWheelSpeed = 0.5;
+            // rightWheelSpeed = 0.5;
+            // publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed); 
+            // auto end = std::chrono::high_resolution_clock::now();
+            // auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
+
+
+            // cout << "Time taken by function: " << elapsed.count() << " microseconds" << endl;
+
+            // if(elapsed.count() == 0){
+            //     leftWheelSpeed = 0;
+            //     rightWheelSpeed = 0;
+            //     publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
+            // }
+
 
         }else{
             publish = false; // no action while pressing other
         }
         if (publish){ // transmit speed command to left and right motors
-            publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed); 
-        }else if(msg.data == "e"){
+            publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
+        }else if(msg.data == "e"){            
             leftWheelSpeed = 0.0;
             rightWheelSpeed = 0.0;
             publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
-            exit(0);
-        }    
+            ros::shutdown();
+        }   
+          
     }
    
 };
 int main(int argc, char ** argv){
-  ros::init(argc, argv, "jetbotDriveCmd");
-  jetbotDriveCmd jetDriver;
-  ros::spin();
-  return 0;
-  }
+    ros::init(argc, argv, "jetbotDriveCmd");
+    jetbotDriveCmd jetDriver;
+    ros::spin();
+    return 0;
+}
 
 
