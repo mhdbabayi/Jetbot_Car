@@ -21,7 +21,6 @@ swith to the jetRacer branch
 launch the jetRacer.launch file with the run_the_robot argument set to "true":
 ```
 $roslaunch jetbotcar jetRacer.launch run_the_robot:="true"
-
 ```
 
 
