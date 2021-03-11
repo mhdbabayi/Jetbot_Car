@@ -30,3 +30,4 @@
     <rosparam command="load" file="$(find jetbotcar)/params.yaml"/>
   </node>
 
+</launch>

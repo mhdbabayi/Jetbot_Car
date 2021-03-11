@@ -23,11 +23,11 @@ class jetracer:
         	
         self.driveTopic = rospy.get_param("/jetRacerDriveNode/jetracer_drive_topic")
         self.commandSub = rospy.Subscriber(self.driveTopic,jetRacerDriveMsg, self.driveCallBack)
-        
+        rospy.loginfo("Robot ready to operate, you can control using W, A, S, D and space bar\n")
 
     
     def driveCallBack(self, msg):
-        steeringCmd = max(min(msg.steerig , 1.0), -1.0)
+        steeringCmd = max(min(msg.steering , 1.0), -1.0)
         throttleCmd = max(min(msg.throttle , 1.0), -1.0)
         self.on_steering(steeringCmd)
         self.on_throttle(throttleCmd)
