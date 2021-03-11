@@ -15,7 +15,7 @@ private:
     ros::Subscriber key_sub;
 
     ros::Publisher diff_drive_pub;
-    ros::Publisher jetracer_drive_pub
+    ros::Publisher jetracer_drive_pub;
     
     ros::Subscriber radius_sub;
 
@@ -44,8 +44,8 @@ public:
         diff_drive_pub = n.advertise<jetbotcar::Jetdrivemsg>(diff_drive_topic , 10);
         jetracer_drive_pub = n.advertise<jetbotcar::jetRacerDriveMsg>(jetracer_drive_topic, 10);
 
-        key_sub = n.subscribe(key_topic, 1, &jetbotDriveCmd::key_callback, this);
-        radius_sub = n.subscribe(radiusTopic , 1, &jetbotDriveCmd::radiusCalc, this);
+        key_sub = n.subscribe(key_topic, 1, &jetracerDriveCmd::key_callback, this);
+        radius_sub = n.subscribe(radiusTopic , 1, &jetracerDriveCmd::radiusCalc, this);
 
     }
 
@@ -70,7 +70,7 @@ public:
         diff_drive_pub.publish(diffdrivemsg);
     }*/
     void publishtoJetracer(double throttle, double steering){
-        jetbotcar::jetRacerDriveMsg jetracerMsg
+        jetbotcar::jetRacerDriveMsg jetracerMsg;
         jetracerMsg.throttle = throttle;
         jetracerMsg.steering = steering;
         jetracer_drive_pub.publish(jetracerMsg);
@@ -89,15 +89,15 @@ public:
             steering = 0.0;
         
         }else if(msg.data=="s"){
-            throttel = -1.0;
+            throttle = -1.0;
             steering = 0;
 
         }else if(msg.data == "a"){
-            throttel = 0.0;
+            throttle = 0.0;
             steering = 0.5;
 
         }else if(msg.data == "d") {
-            throttel = 0.0;
+            throttle = 0.0;
             steering = -0.5;
         }else if (msg.data ==" "){
             throttle = 0.0;
