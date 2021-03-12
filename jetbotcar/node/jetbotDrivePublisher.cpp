@@ -12,7 +12,7 @@
 #include "jetbotcar/Jetdrivemsg.h"
 #include <iostream>
 #include <cstdio>
-
+#include <ctime>
 using namespace std;
 
 class jetbotDriveCmd
@@ -130,40 +130,75 @@ public:
         }else if(msg.data == "o"){ //open loop drive in a circle
             leftWheelSpeed = 0.8*rotationWheelSpeedScale;
             rightWheelSpeed = 1.1*rotationWheelSpeedScale;
-        }else if(msg.data == "l"){ //just measure the time and forward rather than use the loop
-            clock_t start, end;
-            start = clock();
-            leftWheelSpeed = 0.5;
-            rightWheelSpeed = 0.5;
-            end = clock();
-            cout << " the start time is " <<(double)(start) / CLOCKS_PER_SEC << "s" << endl;
+        }
+        // else if(msg.data == "l"){ //just measure the time and forward rather than use the loop
+            
 
-            if((double(end - start) / CLOCKS_PER_SEC) > 5){
-                leftWheelSpeed = 0;
-                rightWheelSpeed = 0;
-                publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
-            }
-            // auto begin = std::chrono::high_resolution_clock::now();
-
-            // leftWheelSpeed = 0.5;
-            // rightWheelSpeed = 0.5;
-            // publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed); 
-            // auto end = std::chrono::high_resolution_clock::now();
-            // auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
+        //     ros::Time currentTime = ros::Time::now(); //record start time
+        //     ros::Duration durationTime = ros::Duration(5); //duration is 5s
+        //     ros::Time endTime = currentTime + durationTime; // set an end time
 
 
-            // cout << "Time taken by function: " << elapsed.count() << " microseconds" << endl;
+        //     bool OpenLoopDrive = true; //set OpenLoopDrive to true
 
-            // if(elapsed.count() == 0){
-            //     leftWheelSpeed = 0;
-            //     rightWheelSpeed = 0;
-            //     publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
-            // }
+        //     leftWheelSpeed = 0.5;
+        //     rightWheelSpeed = 0.5;
+
+        //     cout << " current time: " << currentTime << endl;
+
+        //     cout << " duration time: " << durationTime << endl;
+
+        //     cout << " end time: " << endTime << endl;
+
+        //     if (OpenLoopDrive){
+        //         publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
+        //     }else if (ros::Time::now() > endTime){
+        //         OpenLoopDrive = false;
+        //         leftWheelSpeed = 0.0;
+        //         rightWheelSpeed = 0.0;
+        //         publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
+        //     }
 
 
-        }else{
+        // }
+        else{
             publish = false; // no action while pressing other
         }
+
+        if(msg.data == "l"){ //just measure the time and forward rather than use the loop
+            
+            publish = false;
+
+            ros::Time currentTime = ros::Time::now(); //record start time
+            ros::Duration durationTime = ros::Duration(3); //duration is 3s
+            ros::Time endTime = currentTime + durationTime; // set an end time
+
+
+            bool OpenLoopDrive = true; //set OpenLoopDrive to true
+
+            leftWheelSpeed = 0.5;
+            rightWheelSpeed = 0.5;
+
+            cout << " current time: " << currentTime << endl;
+
+            cout << " duration time: " << durationTime << endl;
+
+            cout << " end time: " << endTime << endl;
+
+
+        }
+        if (OpenLoopDrive){
+
+            publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
+
+        }else if (ros::Time::now() > endTime){
+            OpenLoopDrive = false;
+            leftWheelSpeed = 0.0;
+            rightWheelSpeed = 0.0;
+            publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
+        }
+
+
         if (publish){ // transmit speed command to left and right motors
             publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
         }else if(msg.data == "e"){            
@@ -171,12 +206,15 @@ public:
             rightWheelSpeed = 0.0;
             publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
             ros::shutdown();
-        }   
+        }
           
     }
    
 };
 int main(int argc, char ** argv){
+    time_t startTime;
+    time(&startTime);
+    cout << time(&startTime) << endl;
     ros::init(argc, argv, "jetbotDriveCmd");
     jetbotDriveCmd jetDriver;
     ros::spin();
