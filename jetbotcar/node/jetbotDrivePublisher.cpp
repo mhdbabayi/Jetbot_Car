@@ -22,12 +22,14 @@ private:
 
 
     ros::Subscriber key_sub;
-    ros::Subscriber loopdrive_sub;
+
     ros::Publisher diff_drive_pub;
 
     ros::Subscriber radius_sub;
 
     ros::Subscriber e_stop_sub; //subscriber for the e-stop button
+
+    ros::Subscriber loopdrive_sub;
 
     double prev_key_velocity = 0.0;
     double keyboard_max_speed = 1.0;
@@ -125,7 +127,7 @@ public:
 
         }else if (ros::Time::now() >  endTime){
             OpenLoopDrive = false;
-            leftWheelSpeed = 0.;
+            leftWheelSpeed = 0.0;
             rightWheelSpeed = 0.0;
             publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
         }
@@ -196,35 +198,33 @@ public:
             publish = false; // no action while pressing other
         }
 
-        if(msg.data == "l"){ //just measure the time and forward rather than use the loop
+        // if(msg.data == "l"){ //just measure the time and forward rather than use the loop
             
-            // publish = false;
+        //     publish = false;
 
-            // ros::Time currentTime = ros::Time::now(); //record start time
-            // ros::Duration durationTime = ros::Duration(3); //duration is 3s
-            // ros::Time endTime = currentTime + durationTime; // set an end time
-
-
-            // bool OpenLoopDrive = true; //set OpenLoopDrive to true
-
-            leftWheelSpeed = 0.5;
-            rightWheelSpeed = 0.5;
-
-            // cout << " current time: " << currentTime << endl;
-
-            // cout << " duration time: " << durationTime << endl;
-
-            // cout << " end time: " << endTime << endl;
+        //     ros::Time currentTime = ros::Time::now(); //record start time
+        //     ros::Duration durationTime = ros::Duration(3); //duration is 3s
+        //     ros::Time endTime = currentTime + durationTime; // set an end time
 
 
-        }
- 
-        
+        //     bool OpenLoopDrive = true; //set OpenLoopDrive to true
+
+        //     leftWheelSpeed = 0.5;
+        //     rightWheelSpeed = 0.5;
+
+        //     cout << " current time: " << currentTime << endl;
+
+        //     cout << " duration time: " << durationTime << endl;
+
+        //     cout << " end time: " << endTime << endl;
+
+
+        // }
         // if (OpenLoopDrive){
 
         //     publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
 
-        // }else if (ros::Time::now() > ros::Time endTime){
+        // }else if (ros::Time::now() > endTime){
         //     OpenLoopDrive = false;
         //     leftWheelSpeed = 0.0;
         //     rightWheelSpeed = 0.0;
