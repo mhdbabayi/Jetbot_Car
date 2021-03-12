@@ -22,7 +22,7 @@ private:
 
 
     ros::Subscriber key_sub;
-    ros::Subscriber loopdrive_sub;
+
     ros::Publisher diff_drive_pub;
 
     ros::Subscriber radius_sub;
@@ -63,7 +63,6 @@ public:
         key_sub = n.subscribe(key_topic, 1, &jetbotDriveCmd::key_callback, this);
         radius_sub = n.subscribe(radiusTopic , 1, &jetbotDriveCmd::radiusCalc, this);
         e_stop_sub = n.subscribe(key_topic, 1, &jetbotDriveCmd::e_stop, this);
-        loopdrive_sub = n.subscribe(key_topic, 1, &jetbotDriveCmd::loopdrive, this);
     }
 
     void radiusCalc(const std_msgs::Float64 & msg){
@@ -198,38 +197,36 @@ public:
 
         if(msg.data == "l"){ //just measure the time and forward rather than use the loop
             
-            // publish = false;
+            publish = false;
 
-            // ros::Time currentTime = ros::Time::now(); //record start time
-            // ros::Duration durationTime = ros::Duration(3); //duration is 3s
-            // ros::Time endTime = currentTime + durationTime; // set an end time
+            ros::Time currentTime = ros::Time::now(); //record start time
+            ros::Duration durationTime = ros::Duration(3); //duration is 3s
+            ros::Time endTime = currentTime + durationTime; // set an end time
 
 
-            // bool OpenLoopDrive = true; //set OpenLoopDrive to true
+            bool OpenLoopDrive = true; //set OpenLoopDrive to true
 
             leftWheelSpeed = 0.5;
             rightWheelSpeed = 0.5;
 
-            // cout << " current time: " << currentTime << endl;
+            cout << " current time: " << currentTime << endl;
 
-            // cout << " duration time: " << durationTime << endl;
+            cout << " duration time: " << durationTime << endl;
 
-            // cout << " end time: " << endTime << endl;
+            cout << " end time: " << endTime << endl;
 
 
         }
- 
-        
-        // if (OpenLoopDrive){
+        if (OpenLoopDrive){
 
-        //     publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
+            publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
 
-        // }else if (ros::Time::now() > ros::Time endTime){
-        //     OpenLoopDrive = false;
-        //     leftWheelSpeed = 0.0;
-        //     rightWheelSpeed = 0.0;
-        //     publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
-        // }
+        }else if (ros::Time::now() > endTime){
+            OpenLoopDrive = false;
+            leftWheelSpeed = 0.0;
+            rightWheelSpeed = 0.0;
+            publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
+        }
 
 
         if (publish){ // transmit speed command to left and right motors
