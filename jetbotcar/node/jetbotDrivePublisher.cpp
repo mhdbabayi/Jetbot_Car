@@ -125,7 +125,7 @@ public:
 
         }else if (ros::Time::now() >  endTime){
             OpenLoopDrive = false;
-            leftWheelSpeed = 0.;
+            leftWheelSpeed = 0.0;
             rightWheelSpeed = 0.0;
             publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
         }
