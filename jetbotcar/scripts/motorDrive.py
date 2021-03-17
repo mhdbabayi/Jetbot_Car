@@ -11,9 +11,9 @@ def set_speed(motor_ID, value):
     speed = int(min(max(abs(value*max_pwm), 0), max_pwm))
 
     if motor_ID == 1:
-        motor = motor_right
-    elif motor_ID == 2:
         motor = motor_left
+    elif motor_ID == 2:
+        motor = motor_right
     else:
         rospy.logerror('set_speed(%d, %f) -> invalid motor_ID = %d', motor_ID, value, motor_ID)
         return
