@@ -13,6 +13,8 @@
 #include <iostream>
 #include <cstdio>
 #include <ctime>
+#include "ros/ros.h"
+
 using namespace std;
 
 class jetbotDriveCmd
@@ -29,13 +31,17 @@ private:
 
     ros::Subscriber e_stop_sub; //subscriber for the e-stop button
 
-    ros::Subscriber loopdrive_sub;
+    ros::Subscriber loopdrive_sub; // subscriber for the loopdrive function
 
     double prev_key_velocity = 0.0;
     double keyboard_max_speed = 1.0;
     double turnRadius = 1;
     double rotationWheelSpeedScale, trackWidth;
     double constantRadiusLeftWheelSpeed, constantRadiusRightWheelSpeed;
+
+    bool OpenLoopDrive;
+    double leftWheelSpeed;
+    double rightWheelSpeed;
 
 public:
     jetbotDriveCmd()
@@ -104,39 +110,37 @@ public:
         }
     }
     void loopdrive(const std_msgs::String & msg){
-        double leftWheelSpeed;
-        double rightWheelSpeed;
 
-        ros::Time currentTime = ros::Time::now(); //record start time
-        ros::Duration durationTime = ros::Duration(3); //duration is 3s
-        ros::Time endTime = currentTime + durationTime; // set an end time
-
-        bool OpenLoopDrive = true; //set OpenLoopDrive to true
-
-        cout << " current time: " << currentTime << endl;
-        cout << " duration time: " << durationTime << endl;
-        cout << " end time: " << endTime << endl;
-
+        // OpenLoopDrive = true;
+        
         if(msg.data == "y"){
+        
+            ros::Timer timer = n.createTimer(ros::Duration(3),\
+             &jetbotDriveCmd::timerCallback, this); //timer-set
+
+            OpenLoopDrive = true; //set OpenLoopDrive to true
+
             leftWheelSpeed = 0.5;
-            rightWheelSpeed = 0.5;
-        }
-        if (OpenLoopDrive){
-
-            publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
-
-        }else if (ros::Time::now() >  endTime){
-            OpenLoopDrive = false;
-            leftWheelSpeed = 0.0;
-            rightWheelSpeed = 0.0;
+            rightWheelSpeed = 0.5;           
             publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
         }
+        // if(OpenLoopDrive){
+        //     publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
+        // } 
+
+    }
+
+    void timerCallback(const ros::TimerEvent& event){
+        OpenLoopDrive = false;
+        leftWheelSpeed = 0.0;
+        rightWheelSpeed = 0.0;
+        publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
 
     }
 
     void key_callback(const std_msgs::String & msg){
-        double leftWheelSpeed;
-        double rightWheelSpeed;
+        // double leftWheelSpeed;
+        // double rightWheelSpeed;
         bool publish = true;
 
         if (msg.data == "w"){
@@ -164,74 +168,9 @@ public:
             leftWheelSpeed = 0.8*rotationWheelSpeedScale;
             rightWheelSpeed = 1.1*rotationWheelSpeedScale;
         }
-        // else if(msg.data == "l"){ //just measure the time and forward rather than use the loop
-            
-
-        //     ros::Time currentTime = ros::Time::now(); //record start time
-        //     ros::Duration durationTime = ros::Duration(5); //duration is 5s
-        //     ros::Time endTime = currentTime + durationTime; // set an end time
-
-
-        //     bool OpenLoopDrive = true; //set OpenLoopDrive to true
-
-        //     leftWheelSpeed = 0.5;
-        //     rightWheelSpeed = 0.5;
-
-        //     cout << " current time: " << currentTime << endl;
-
-        //     cout << " duration time: " << durationTime << endl;
-
-        //     cout << " end time: " << endTime << endl;
-
-        //     if (OpenLoopDrive){
-        //         publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
-        //     }else if (ros::Time::now() > endTime){
-        //         OpenLoopDrive = false;
-        //         leftWheelSpeed = 0.0;
-        //         rightWheelSpeed = 0.0;
-        //         publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
-        //     }
-
-
-        // }
         else{
             publish = false; // no action while pressing other
         }
-
-        // if(msg.data == "l"){ //just measure the time and forward rather than use the loop
-            
-        //     publish = false;
-
-        //     ros::Time currentTime = ros::Time::now(); //record start time
-        //     ros::Duration durationTime = ros::Duration(3); //duration is 3s
-        //     ros::Time endTime = currentTime + durationTime; // set an end time
-
-
-        //     bool OpenLoopDrive = true; //set OpenLoopDrive to true
-
-        //     leftWheelSpeed = 0.5;
-        //     rightWheelSpeed = 0.5;
-
-        //     cout << " current time: " << currentTime << endl;
-
-        //     cout << " duration time: " << durationTime << endl;
-
-        //     cout << " end time: " << endTime << endl;
-
-
-        // }
-        // if (OpenLoopDrive){
-
-        //     publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
-
-        // }else if (ros::Time::now() > endTime){
-        //     OpenLoopDrive = false;
-        //     leftWheelSpeed = 0.0;
-        //     rightWheelSpeed = 0.0;
-        //     publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
-        // }
-
-
         if (publish){ // transmit speed command to left and right motors
             publish_to_diff_drive(rightWheelSpeed , leftWheelSpeed);
         }else if(msg.data == "e"){            
@@ -245,12 +184,9 @@ public:
    
 };
 int main(int argc, char ** argv){
-    time_t startTime;
-    time(&startTime);
-    cout << time(&startTime) << endl;
     ros::init(argc, argv, "jetbotDriveCmd");
     jetbotDriveCmd jetDriver;
-    ros::spin();
+    ros::spin(); // infinte loop waiting for callback funtion
     return 0;
 }
 
