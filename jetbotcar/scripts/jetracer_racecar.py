@@ -1,7 +1,7 @@
 
 from adafruit_servokit import ServoKit 
-from jetbotcar.msg import Jetdrivemsg
-from jetbotcar.msg import jetRacerDriveMsg
+from jetbotcar.msg import Jetdrivemsg # float64 left, right
+from jetbotcar.msg import jetRacerDriveMsg # float64 throttle, steering
 import rospy
 import time
 
@@ -9,12 +9,14 @@ class jetracer:
 
     i2c_address1 = 0x40
     i2c_address2 = 0x60
-    steering_gain = 0.65
-    steering_offset = 0
+    steering_gain = 0.5
+    steering_offset = 0.7
     steering_channel = 0
     throttle_gain = 0.8
 
     def __init__(self , *args, **kwargs):
+        # Set channels to the number of servo channels on your kit.
+        # 16 for Shield/HAT/Bonnet  
         self.kit = ServoKit(channels=16, address=self.i2c_address1)
         self.motor= ServoKit(channels=16, address=self.i2c_address2)
         self.motor._pca.frequency = 1600

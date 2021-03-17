@@ -85,20 +85,20 @@ public:
         bool publish = true;
 
         if (msg.data == "w"){
-            throttle = 1.0;
+            throttle = -1.0;
             steering = 0.0;
         
         }else if(msg.data=="s"){
-            throttle = -1.0;
+            throttle = 1.0;
             steering = 0;
 
         }else if(msg.data == "a"){
             throttle = 0.0;
-            steering = 0.5;
+            steering = -0.5;
 
         }else if(msg.data == "d") {
             throttle = 0.0;
-            steering = -0.5;
+            steering = 0.5;
         }else if (msg.data ==" "){
             throttle = 0.0;
             steering = 0.0;
@@ -112,6 +112,11 @@ public:
         if (publish){
             publishtoJetracer(throttle , steering);
 
+        }else if(msg.data == "e"){            
+            throttle = 0.0;
+            steering = 0.0;
+            publishtoJetracer(throttle , steering);
+            ros::shutdown();
         }
     }
    
