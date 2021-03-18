@@ -9,7 +9,7 @@ class jetracer:
 
     i2c_address1 = 0x40
     i2c_address2 = 0x60
-    steering_gain = 0.5
+    steering_gain = 0.4
     steering_offset = 0.7
     steering_channel = 0
     throttle_gain = 0.8

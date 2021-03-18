@@ -25,6 +25,9 @@ private:
     double turnRadius = 1;
     double rotationWheelSpeedScale, trackWidth;
     double constantRadiusLeftWheelSpeed, constantRadiusRightWheelSpeed;
+    double openloopdrive;
+    double throttle;
+    double steering;
 
 public:
     jetracerDriveCmd()
@@ -79,8 +82,7 @@ public:
     void key_callback(const std_msgs::String & msg){
         /*double leftWheelSpeed;
         double rightWheelSpeed;*/
-        double throttle;
-        double steering;
+
 
         bool publish = true;
 
@@ -105,8 +107,16 @@ public:
         }else if(msg.data == "q"){
             throttle =   0.5;
             steering =  0.5;
-        }
-        else {
+        }else if(msg.data == "l"){
+            ros::Timer timer = n.createTimer(ros::Duration(3),\
+             &jetracerDriveCmd::timerCallback, this); //timer-set
+
+            openloopdrive = true;
+            
+            throttle = 0.5;
+            steering = 0;
+
+        }else {
             publish = false;
         }
         if (publish){
@@ -119,7 +129,13 @@ public:
             ros::shutdown();
         }
     }
-   
+    void timerCallback(const ros::TimerEvent& event){
+        openloopdrive = false;
+        throttle = 0.0;
+        steering = 0.0;
+        publishtoJetracer(throttle , steering);
+
+    }
 };
 int main(int argc, char ** argv){
   ros::init(argc, argv, "jetRacerDriveCmd");
