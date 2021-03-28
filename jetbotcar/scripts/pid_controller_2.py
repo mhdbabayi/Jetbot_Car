@@ -18,8 +18,7 @@ kd = 0
 ki = 0
 servo_offset = 0.0
 prev_error = 0.0 
-lateralError = 0.0
-integral = 0.0
+#lateralError = 0.0
 
 previousTime = 0.0
 Setpoint = 0.0 # follow the middle of the line is set as 0.0
@@ -48,7 +47,6 @@ class PIDControl:
     
     def pid_control(self, error, velocity):
         
-        global integral
         global prev_error
         global previousTime
         global Setpoint
@@ -56,7 +54,6 @@ class PIDControl:
         global ki
         global kd
         publish = bool(True)
-        angle = 0.0
 
 
         #TODO: Use kp, ki & kd to implement a PID controller for 
@@ -101,7 +98,7 @@ class PIDControl:
         #     publish = bool(False)
         ###################################
 
-        
+
         if publish:
             self.publishJetracer(throttle, steering)
 
