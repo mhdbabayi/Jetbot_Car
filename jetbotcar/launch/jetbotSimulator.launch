@@ -29,7 +29,14 @@
     <rosparam command="load" file="$(find jetbotcar)/params.yaml"/>
   </node>
 
+<!-- test -->
+  <node pkg="jetbotcar" name="talker" type="talker.py" output="screen" if="$(arg run_the_robot)">
+    <rosparam command="load" file="$(find jetbotcar)/params.yaml"/>
+  </node>
 
+  <node pkg="jetbotcar" name="listener" type="listener.py" output="screen" if="$(arg run_the_robot)">
+    <rosparam command="load" file="$(find jetbotcar)/params.yaml"/>
+  </node>
 
 
 

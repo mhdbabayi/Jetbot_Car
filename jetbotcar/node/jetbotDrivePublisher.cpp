@@ -57,11 +57,13 @@ public:
         if (msg.data > 0){
             constantRadiusRightWheelSpeed = 1;
             constantRadiusLeftWheelSpeed = ((msg.data-trackWidth)/(msg.data + trackWidth));
-        }else{
+        }else if(msg.data< 0){
             constantRadiusLeftWheelSpeed = 1;
             constantRadiusRightWheelSpeed = ((std::abs(msg.data)-trackWidth)/(std::abs(msg.data) + trackWidth));
+        }else{
+            ROS_INFO("turn radius topic read");
         }
-        ROS_INFO("turn radius topic read");
+        
 
     }
     /*void publish_to_diff_drive(double rightWheelTrq,double leftWheelTrq)
@@ -72,6 +74,8 @@ public:
         diffdrivemsg.right  = rightWheelTrq;
         diff_drive_pub.publish(diffdrivemsg);
     }*/
+
+    /* publishing function */
     void publishtoJetracer(double throttle, double steering){
         jetbotcar::jetRacerDriveMsg jetracerMsg;
         jetracerMsg.throttle = throttle;
@@ -87,19 +91,19 @@ public:
         bool publish = true;
 
         if (msg.data == "w"){
-            throttle = -1.0;
+            throttle = -0.5;
             steering = 0.0;
         
         }else if(msg.data=="s"){
-            throttle = 1.0;
+            throttle = 0.5;
             steering = 0;
 
         }else if(msg.data == "a"){
-            throttle = 0.0;
+            throttle = -0.5;
             steering = -0.5;
 
         }else if(msg.data == "d") {
-            throttle = 0.0;
+            throttle = -0.5;
             steering = 0.5;
         }else if (msg.data ==" "){
             throttle = 0.0;
@@ -129,7 +133,7 @@ public:
             ros::shutdown();
         }
     }
-    void timerCallback(const ros::TimerEvent& event){
+    void timerCallback(const ros::TimerEvent& ){
         openloopdrive = false;
         throttle = 0.0;
         steering = 0.0;

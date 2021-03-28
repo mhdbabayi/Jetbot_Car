@@ -25,6 +25,20 @@
     <rosparam command="load" file="$(find jetbotcar)/params.yaml"/>
   </node>
 
+<!-- test -->
+
+  <node pkg="jetbotcar" name="ImageProcess" type="image_process.py" output="screen" if="$(arg run_the_robot)">
+    <rosparam command="load" file="$(find jetbotcar)/params.yaml"/>
+  </node>
+
+  <node pkg="jetbotcar" name="PIDcontroller" type="pid_controller_2.py" output="screen" if="$(arg run_the_robot)">
+    <rosparam command="load" file="$(find jetbotcar)/params.yaml"/>
+  </node>
+
+  <node pkg="jetbotcar" name="LaneDetection" type="lane_detection.py" output="screen" if="$(arg run_the_robot)">
+    <rosparam command="load" file="$(find jetbotcar)/params.yaml"/>
+  </node>
+
 <!-- Launch the Keyboard Node -->
   <node pkg="jetbotcar" name="keyboard" type="keyboard" output="screen">
     <rosparam command="load" file="$(find jetbotcar)/params.yaml"/>
