@@ -68,7 +68,7 @@ class PIDControl: # don't need class
         rateError = (error - lastError)/elapsedTime
 
         # PID output computation
-        output = kp*error + ki*cumError + kd*rateError
+        out = kp*error + ki*cumError + kd*rateError
 
         # Remember some variables for next time
         lastError = error
@@ -76,24 +76,26 @@ class PIDControl: # don't need class
 
         # output conditions need to be modified
 
+        
+
         ###################################
-        if output > 0 and output < 5:
-            throttle = 0.5
-            steering = 0.5
-        elif output > 5 and output < 10:
-            throttle = 0.5
-            steering = 1
-        elif output > -5 and output < 0:
-            throttle = 0.5
-            steering = -0.5
-        elif output > -10 and output < -5:
-            throttle = 0.5
-            steering = -1
-        elif output == 0:
-            throttle = 0.5
-            steering = 0
-        else:
-            publish = bool(False)
+        # if error > 0 and error < 5:
+        #     throttle = 0.5
+        #     steering = 0.5
+        # elif error > 5 and error < 10:
+        #     throttle = 0.5
+        #     steering = 1
+        # elif error > -5 and error < 0:
+        #     throttle = 0.5
+        #     steering = -0.5
+        # elif error > -10 and error < -5:
+        #     throttle = 0.5
+        #     steering = -1
+        # elif error == 0:
+        #     throttle = 0.5
+        #     steering = 0
+        # else:
+        #     publish = bool(False)
         ###################################
 
 
