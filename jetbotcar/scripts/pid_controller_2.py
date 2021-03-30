@@ -28,12 +28,12 @@ Setpoint = 0.0 # follow the middle of the line is set as 0.0
 # Get prameters from the yaml file
 driveTopic = rospy.get_param("/jetRacerDriveNode/jetracer_drive_topic")
 
-class PIDControl:
+class PIDControl: # don't need class
 
     def __init__(self):
 
         # Subscribe to image process
-        self.error_sub = rospy.Subscriber('lateral_error', String, queue_size=10)
+        self.error_sub = rospy.Subscriber('lateral_error',float64, queue_size=10)
         #Publish to drive
         self.drive_pub = rospy.Publisher(driveTopic,jetRacerDriveMsg, queue_size=10) 
     
@@ -56,15 +56,15 @@ class PIDControl:
         publish = bool(True)
 
 
-        #TODO: Use kp, ki & kd to implement a PID controller for 
+        # Use kp, ki & kd to implement a PID controller for 
 
         # Time stamp
         currentTime = rospy.get_rostime()
         elapsedTime = currentTime - previousTime
 
-        # Compute all the working error variables
+        # Compute all the working error variables, careful with the sign convension
         error = Setpoint - lateralError # here lateral error is the error input from image processing
-        cumError += error * elapsedTime
+        cumError += error * elapsedTime #
         rateError = (error - lastError)/elapsedTime
 
         # PID output computation
@@ -74,7 +74,7 @@ class PIDControl:
         lastError = error
         previousTime =currentTime
 
-        # outputs need to be modified
+        # output conditions need to be modified
 
         ###################################
         if output > 0 and output < 5:
