@@ -3,7 +3,7 @@ import rospy
 from std_msgs.msg import String
 from jetbotcar.msg import Jetdrivemsg # float64 left, right
 from jetbotcar.msg import jetRacerDriveMsg # float64 throttle, steering
-from jetbotcar.msg import jetErrorMsg # float64 lateralError
+# from jetbotcar.msg import jetErrorMsg # float64 lateralError
 import rospy
 import time
 
@@ -19,7 +19,7 @@ import numpy as np
 kp = 0
 kd = 0
 ki = 0
-lateralError = 0.0
+# lateralError = 0.0
 previousTime = 0.0
 Setpoint = 0.0 # follow the middle of the line is set as 0.0
 
@@ -33,7 +33,7 @@ def pidCallback(msg):
     
     global previousTime
     global Setpoint
-    global lateralError
+    # global lateralError
     global steeringGain
 
     global kp
@@ -44,16 +44,17 @@ def pidCallback(msg):
     publish = bool(True)
 
     # assign error messages from image processing to lateralError
-    lateralError = msg.lateralError
+    lateralErrorCmd = msg.lateralError
 
     # Use kp, ki & kd to implement a PID controller for 
 
     # Time stamp
     currentTime = rospy.get_rostime()
+    print(currentTime)
     elapsedTime = currentTime - previousTime
 
     # Compute all the working error variables, careful with the sign convension
-    error = Setpoint - lateralError # here lateral error is the error input from image processing
+    error = Setpoint - lateralErrorCmd # here lateral error is the error input from image processing
     cumError += error * elapsedTime #
     rateError = (error - lastError)/elapsedTime
 
@@ -105,10 +106,11 @@ def main():
 
     # # Get topic name from the yaml file 
     # (just a topic title, doesn't include anything)
-    driveTopic = rospy.get_param("/jetRacerDriveNode/jetracer_drive_topic")
+    # driveTopic = rospy.get_param("/jetRacerDriveNode/jetracer_drive_topic")
 
     # jetRacerDriveMsg contains throttle and steering cmds
-    drive_pub = rospy.Publisher(driveTopic,jetRacerDriveMsg, queue_size=10)
+    # drive_pub = rospy.Publisher(driveTopic,jetRacerDriveMsg, queue_size=10)
+    drive_pub = rospy.Publisher("driveTopic",jetRacerDriveMsg, queue_size=10)
 
     rate = rospy.Rate(100)
     while not rospy.is_shutdown():
