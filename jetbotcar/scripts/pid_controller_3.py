@@ -3,6 +3,8 @@ import rospy
 from jetbotcar.msg import Jetdrivemsg # float64 left, right
 from jetbotcar.msg import jetRacerDriveMsg # float64 throttle, steering
 from jetbotcar.msg import jetErrorMsg # float64 lateralError
+# from scipy import integrate
+
 import rospy
 import time
 
@@ -17,13 +19,13 @@ import numpy as np
 
 
 #PID CONTROL PARAMS
-kp = 0
-kd = 0
+kp = 1
+kd = 0.5
 ki = 0
 # lateralError = 0.0
-previousTime = 0.0
+
 Setpoint = 0.0 # follow the middle of the line is set as 0.0
-currentTime = rospy.get_time() 
+
 Ts = 1
 cumError = 0.0
 lastError = 0.0
@@ -35,56 +37,54 @@ steeringGain = 0.0
 
 
 def pidCallback(msg):
+
+    global startTime
     global currentTime
-    global previousTime
     global Setpoint
     global Ts
     global cumError
     global lastError
     # global lateralError
-    global startTime
+
     global kp, ki, kd
     global throttleCmd, steeringCmd
 
     publish = bool(True)
 
-    # assign error messages from image processing to lateralError
-    lateralErrorCmd = msg.data
+    lateralErrorCmd = msg.data # assign error messages from image processing to lateralError
+   
     # Use kp, ki & kd to implement a PID controller for 
 
     # Time stamp
-    # seconds = rospy.get_time()
-    # t = rospy.Time.from_sec(time.time())
-    
-    currentTime = currentTime + 0.01
-    # rospy.loginfo("seconds: %.2f", startTime)
 
-    # currentTime = currentTime + 0.01
+    currentTime = rospy.get_time()
     rospy.loginfo("Current time: %.2f", currentTime)
 
-    elapsedTime = currentTime - previousTime
-    rospy.loginfo("Elapsed time: %d\n", elapsedTime)
+    elapsedTime = currentTime - startTime
+    rospy.loginfo("Elapsed time: %.2f", elapsedTime)
 
     # Compute all the working error variables, careful with the sign convension
     error = lateralErrorCmd #lateral error is the error input from image processing
-    # rospy.loginfo("lateral error: %d", error)
+    rospy.loginfo("lateral error: %.2f", error)
 
-    cumError = cumError + error * elapsedTime #
+    # cumError = cumError + error * elapsedTime
+    # cumError = integrate.quad(error, 0, 0.1)
+    rospy.loginfo("Cumulative Error: %.2f", cumError)
 
-
-    # rateError = (error - lastError)/elapsedTime
+    rateError = (error - lastError)/elapsedTime
     # rospy.loginfo("rate error: %.2f", rateError)
 
 
     # PID output computation
-    output = kp*error + ki*cumError# need satruation
-    # rospy.loginfo("PID output: %d\n", output)
+    output = kp * error + ki * cumError + kd * rateError # need satruation
+    rospy.loginfo("PID output: %.2f\n", output)
+
+
     # Remember some variables for next time
     lastError = error
     previousTime = currentTime
 
     # output conditions need to be modified
-
     ###################################
     if output > 0 and output < 5:
         throttleCmd = 0.5
@@ -117,12 +117,15 @@ def pidCallback(msg):
 def main():
     global throttleCmd, steeringCmd
     global startTime
-    
+    global currentTime
+    global previousTime
     # initialise pid_controller node
     rospy.init_node("pid_controller", anonymous=True)
-    # t = rospy.Time.now()
+
+ 
     startTime = rospy.get_time() # startTime is constant now, stamped straight after init_node
     rospy.loginfo("startTime: %.2f", startTime)
+
     # subscribes to the lateral_error topic
     rospy.Subscriber("/lateral_error", Float64, pidCallback)
 

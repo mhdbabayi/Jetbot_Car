@@ -91,20 +91,20 @@ public:
         bool publish = true;
 
         if (msg.data == "w"){
-            throttle = -1.1;
+            throttle = -10.0;
             steering = 0.0;
-        
+
         }else if(msg.data=="s"){
-            throttle = 1.1;
+            throttle = 10.0;
             steering = 0;
 
         }else if(msg.data == "a"){
-            throttle = 0.1;
-            steering = -0.8;
+            throttle = -0.5;
+            steering = -1;
 
         }else if(msg.data == "d") {
-            throttle = 0.1;
-            steering = 0.8;
+            throttle = -0.5;
+            steering = -1;
         }else if (msg.data ==" "){
             throttle = 0.0;
             steering = 0.0;
