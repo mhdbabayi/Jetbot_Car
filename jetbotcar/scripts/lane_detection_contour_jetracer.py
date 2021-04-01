@@ -127,7 +127,7 @@ cv2.createTrackbar('Brightness',
 
 # Contrast range -127 to 127
 cv2.createTrackbar('Contrast', 'Image',
-                   127, 2 * 127,
+                   250, 2 * 127,
                    brightness_contrast)
 
 

@@ -23,7 +23,7 @@ ki = 0
 # lateralError = 0.0
 previousTime = 0.0
 Setpoint = 0.0 # follow the middle of the line is set as 0.0
-currentTime = 0.0
+currentTime = rospy.get_time() 
 Ts = 1
 cumError = 0.0
 lastError = 0.0
@@ -42,8 +42,7 @@ def pidCallback(msg):
     global cumError
     global lastError
     # global lateralError
-    global steeringGain
-    global t
+    global startTime
     global kp, ki, kd
     global throttleCmd, steeringCmd
 
@@ -57,14 +56,14 @@ def pidCallback(msg):
     # seconds = rospy.get_time()
     # t = rospy.Time.from_sec(time.time())
     
-    currentTime = t # t is constant now, stamped straight after init_node
+    currentTime = currentTime + 0.01
     # rospy.loginfo("seconds: %.2f", startTime)
 
-    currentTime = currentTime + 0.01
+    # currentTime = currentTime + 0.01
     rospy.loginfo("Current time: %.2f", currentTime)
 
     elapsedTime = currentTime - previousTime
-    # rospy.loginfo("Elapsed time: %d", elapsedTime)
+    rospy.loginfo("Elapsed time: %d\n", elapsedTime)
 
     # Compute all the working error variables, careful with the sign convension
     error = lateralErrorCmd #lateral error is the error input from image processing
@@ -82,7 +81,7 @@ def pidCallback(msg):
     # rospy.loginfo("PID output: %d\n", output)
     # Remember some variables for next time
     lastError = error
-    previousTime =currentTime
+    previousTime = currentTime
 
     # output conditions need to be modified
 
@@ -91,17 +90,17 @@ def pidCallback(msg):
         throttleCmd = 0.5
         steeringCmd = output # probably 
         
-    elif output > 5 and output < 10:
+    elif output > 5:
         throttleCmd = 0.5
-        steeringCmd = output
+        steeringCmd = 0.8 # saturation the max steering, condition need further calibration
 
     elif output > -5 and output < 0:
         throttleCmd = 0.5
         steeringCmd = output
 
-    elif output > -10 and output < -5:
+    elif output < -5:
         throttleCmd = 0.5
-        steeringCmd = output
+        steeringCmd = -0.8 # saturation the max steering, condition need further calibration
 
     elif output == 0:
         throttleCmd = 0.5
@@ -117,13 +116,13 @@ def pidCallback(msg):
 
 def main():
     global throttleCmd, steeringCmd
-    global t
+    global startTime
     
     # initialise pid_controller node
     rospy.init_node("pid_controller", anonymous=True)
     # t = rospy.Time.now()
-    t = rospy.get_time()
-    rospy.loginfo("t: %.2f", t)
+    startTime = rospy.get_time() # startTime is constant now, stamped straight after init_node
+    rospy.loginfo("startTime: %.2f", startTime)
     # subscribes to the lateral_error topic
     rospy.Subscriber("/lateral_error", Float64, pidCallback)
 
