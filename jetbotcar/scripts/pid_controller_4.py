@@ -22,14 +22,12 @@ import numpy as np
 kp = 1
 kd = 0.5
 ki = 0
-# lateralError = 0.0
-# cumError = 0.0
-Setpoint = 0.0 # follow the middle of the line is set as 0.0
 
-Ts = 1
 lastError = 0.0
+publish = bool(True)
 
-# INITIALISE THE THROTTLE AND STEERING CMDs
+
+# INITIALISE THE THROTTLE AND STEERING Cmds
 throttleCmd = 0.0
 steeringCmd = 0.0
 steeringGain = 0.0
@@ -40,31 +38,23 @@ def pidCallback(msg):
     # global startTime
     global previousTime
     global currentTime
-    global Setpoint
-    global Ts
     # global cumError
     global lastError
     # global lateralError
 
     global kp, ki, kd
     global throttleCmd, steeringCmd
-
+    global publish
     cumError = 0.0
 
-    publish = bool(True)
+    
 
     lateralErrorCmd = msg.data # assign error messages from image processing to lateralError
-   
-    # Use kp, ki & kd to implement a PID controller for 
-
     # Time stamp
 
     currentTime = rospy.get_time()
-    
-
     elapsedTime = currentTime - previousTime
     
-
     # Compute all the working error variables, careful with the sign convension
     error = lateralErrorCmd #lateral error is the error input from image processing
     cumError = cumError + error * elapsedTime
@@ -92,27 +82,27 @@ def pidCallback(msg):
     # output conditions need to be modified
     ###################################
     if pidOutput > 0 and pidOutput < 1:
-        throttleCmd = 0.0
+        throttleCmd = 0.5
         steeringCmd = pidOutput # probably 
         
-    elif pidOutput > 1:
-        throttleCmd = 0.0
+    elif pidOutput > 1 and pidOutput < 1000:
+        throttleCmd = 0.5
         steeringCmd = 0.8 # saturation the max steering, condition need further calibration
 
     elif pidOutput > -1 and pidOutput < 0:
-        throttleCmd = 0.0
+        throttleCmd = 0.5
         steeringCmd = pidOutput
 
     elif pidOutput < -1:
-        throttleCmd = 0.0
+        throttleCmd = 0.5
         steeringCmd = -0.8 # saturation the max steering, condition need further calibration
 
     elif pidOutput == 0:
-        throttleCmd = 0.0
+        throttleCmd = 0.5
         steeringCmd = pidOutput
     # no lane detection message output, 
     # the car will stop moving and waiting to be put back on track
-    elif pidOutput == 1234: 
+    elif error == 1234: 
         throttleCmd = 0.0
         steeringCmd = 0.0
     
@@ -120,26 +110,47 @@ def pidCallback(msg):
         publish = bool(False)
 
     if publish:
+        rospy.loginfo("publish: %s", publish)
         publishCmdJetracer(throttleCmd, steeringCmd)
+
+        # rospy.loginfo("throttle: %.2f", throttleCmd)
+        # rospy.loginfo("steering: %.2f\n", steeringCmd)
+
+    # elif msg.data == "n":
+    #     throttleCmd = 0.0
+    #     steeringCmd = 0.0
+    #     publishCmdJetracer(throttleCmd, steeringCmd)
+    #     # rospy.on_shutdown(pidCallback)
+    #     # rospy.on_shutdown(main)
+    #     rospy.loginfo("vehicle has been stopped")
+    #     rospy.loginfo("throttle: %.2f", throttleCmd)
+    #     rospy.loginfo("steering: %.2f\n", steeringCmd)
     ###################################
 
 def stopCallback(msg):
     global throttleCmd, steeringCmd
-    
+    global publish 
     if msg.data == "n":
-        rospy.on_shutdown(pidCallback)
-        rospy.on_shutdown(main)
+        publish = bool(False)
+        rospy.loginfo("publish: %s", publish)
+        
+        # rospy.on_shutdown(main())
         throttleCmd = 0.0
         steeringCmd = 0.0
+        publishCmdJetracer(throttleCmd, steeringCmd)
         rospy.loginfo("vehicle has been stopped")
+        rospy.loginfo("throttle: %.2f", throttleCmd)
+        rospy.loginfo("steering: %.2f\n", steeringCmd)
+        # rospy.on_shutdown(pidCallback)
 
-def publishCmdJetracer(throttleCmd, steeringCmd):
+
+
+def publishCmdJetracer(throttleCmd, steeringCmd): # publish function
     global drive_pub
 
     drive_msg = jetRacerDriveMsg()
     drive_msg.throttle = throttleCmd
     drive_msg.steering = steeringCmd
-
     drive_pub.publish(drive_msg) #
     
 
@@ -167,21 +178,33 @@ def main():
     drive_pub = rospy.Publisher(driveTopic,jetRacerDriveMsg, queue_size=10)
 
     rate = rospy.Rate(100)
-    while not rospy.is_shutdown():
+    # while not rospy.is_shutdown():
 
-        # # Write a publishing function
-        # drive_msg = jetRacerDriveMsg()
+    #     # # Write a publishing function
+    #     # drive_msg = jetRacerDriveMsg()
 
-        # drive_msg.throttle = throttleCmd
-        # drive_msg.steering = steeringCmd
+    #     # drive_msg.throttle = throttleCmd
+    #     # drive_msg.steering = steeringCmd
 
-        # # drive_pub.publish(drive_msg) # from now don't publish drive_msg to LLC
+    #     # # drive_pub.publish(drive_msg) # from now don't publish drive_msg to LLC
 
-        publishCmdJetracer(throttleCmd, steeringCmd)
+    #     publishCmdJetracer(throttleCmd, steeringCmd)
 
-        # print("Publishing control commands for throttle and steering")
-        rate.sleep()
+    #     # print("Publishing control commands for throttle and steering")
+    #     rate.sleep()
+
+    publishCmdJetracer(throttleCmd, steeringCmd)
+    rospy.spin()
 
 if __name__=='__main__':
-	main()
+    main()
+    # try:
+    #     main()
+    # except KeyboardInterrupt:
+    #     print('Interrupted')
+    #     try:
+    #         sys.exit(0)
+    #     except SystemExit:
+    #         os._exit(0)
+
 

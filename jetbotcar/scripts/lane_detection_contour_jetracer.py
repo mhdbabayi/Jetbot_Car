@@ -230,7 +230,7 @@ def detect_contour():
                 pub.publish(cX-100)
 
             else:
-                rospy.loginfo("No lines")
+                rospy.loginfo("No line detected")
                 pub.publish(1234)
 
             cv2.imshow('Image', warped_img)
