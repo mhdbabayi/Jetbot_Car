@@ -77,10 +77,10 @@ public:
 
     /* publishing function */
     void publishtoJetracer(double throttle, double steering){
-        jetbotcar::jetRacerDriveMsg jetracerMsg;
-        jetracerMsg.throttle = throttle;
-        jetracerMsg.steering = steering;
-        jetracer_drive_pub.publish(jetracerMsg);
+        // jetbotcar::jetRacerDriveMsg jetracerMsg;
+        // jetracerMsg.throttle = throttle;
+        // jetracerMsg.steering = steering;
+        // jetracer_drive_pub.publish(jetracerMsg);
     }
 
     void key_callback(const std_msgs::String & msg){
@@ -91,11 +91,11 @@ public:
         bool publish = true;
 
         if (msg.data == "w"){
-            throttle = -10.0;
+            throttle = -1.0;
             steering = 0.0;
 
         }else if(msg.data=="s"){
-            throttle = 10.0;
+            throttle = 1.0;
             steering = 0;
 
         }else if(msg.data == "a"){
@@ -104,7 +104,7 @@ public:
 
         }else if(msg.data == "d") {
             throttle = -0.5;
-            steering = -1;
+            steering = 1;
         }else if (msg.data ==" "){
             throttle = 0.0;
             steering = 0.0;

@@ -134,19 +134,20 @@ def stopCallback(msg):
         rospy.loginfo("vehicle has been stopped")
 
 def publishCmdJetracer(throttleCmd, steeringCmd):
+    global drive_pub
 
     drive_msg = jetRacerDriveMsg()
     drive_msg.throttle = throttleCmd
     drive_msg.steering = steeringCmd
 
-    drive_pub.publish(drive_msg) # from now don't publish drive_msg to LLC
+    drive_pub.publish(drive_msg) #
     
 
 def main():
     global throttleCmd, steeringCmd
     global currentTime
     global previousTime
-
+    global drive_pub
     # initialise pid_controller node
     rospy.init_node("pid_controller", anonymous=True)
     previousTime = rospy.get_time() # startTime is constant now, stamped straight after init_node

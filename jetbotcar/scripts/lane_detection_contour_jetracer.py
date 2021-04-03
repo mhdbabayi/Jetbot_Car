@@ -149,8 +149,8 @@ def detect_contour():
     pub= rospy.Publisher('lateral_error', Float64, queue_size=5)
 
     # *ADD* create the subscriber to the keyboard node
-    # keyTopic = rospy.get_param("/jetRacerDriveNode/keyboard_topic")
-    # rospy.Subscriber(keyTopic, String, keyCallback)
+    keyTopic = rospy.get_param("/jetRacerDriveNode/keyboard_topic")
+    rospy.Subscriber(keyTopic, String, keyCallback)
 
 
 
