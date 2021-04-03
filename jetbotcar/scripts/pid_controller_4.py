@@ -118,6 +118,9 @@ def pidCallback(msg):
     
     else:
         publish = bool(False)
+
+    if publish:
+        publishCmdJetracer(throttleCmd, steeringCmd)
     ###################################
 
 def stopCallback(msg):
@@ -130,13 +133,13 @@ def stopCallback(msg):
         steeringCmd = 0.0
         rospy.loginfo("vehicle has been stopped")
 
-# def publishCmdJetracer(msg):
+def publishCmdJetracer(throttleCmd, steeringCmd):
 
-#     drive_msg = jetRacerDriveMsg()
-#     drive_msg.throttle = throttleCmd
-#     drive_msg.steering = steeringCmd
+    drive_msg = jetRacerDriveMsg()
+    drive_msg.throttle = throttleCmd
+    drive_msg.steering = steeringCmd
 
-#     # drive_pub.publish(drive_msg) # from now don't publish drive_msg to LLC
+    drive_pub.publish(drive_msg) # from now don't publish drive_msg to LLC
     
 
 def main():
@@ -165,13 +168,15 @@ def main():
     rate = rospy.Rate(100)
     while not rospy.is_shutdown():
 
-        # Write a publishing function
-        drive_msg = jetRacerDriveMsg()
+        # # Write a publishing function
+        # drive_msg = jetRacerDriveMsg()
 
-        drive_msg.throttle = throttleCmd
-        drive_msg.steering = steeringCmd
+        # drive_msg.throttle = throttleCmd
+        # drive_msg.steering = steeringCmd
 
-        # drive_pub.publish(drive_msg) # from now don't publish drive_msg to LLC
+        # # drive_pub.publish(drive_msg) # from now don't publish drive_msg to LLC
+
+        publishCmdJetracer(throttleCmd, steeringCmd)
 
         # print("Publishing control commands for throttle and steering")
         rate.sleep()
