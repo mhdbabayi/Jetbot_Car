@@ -35,10 +35,6 @@
     <rosparam command="load" file="$(find jetbotcar)/params.yaml"/>
   </node>
 
-  <node pkg="jetbotcar" name="StopButton" type="stop_button.py" output="screen" if="$(arg run_the_robot)">
-    <rosparam command="load" file="$(find jetbotcar)/params.yaml"/>
-  </node>
-
 <!-- Launch the Keyboard Node -->
   <node pkg="jetbotcar" name="keyboard" type="keyboard" output="screen">
     <rosparam command="load" file="$(find jetbotcar)/params.yaml"/>

@@ -24,13 +24,20 @@ kd = 0.5
 ki = 0
 
 lastError = 0.0
-publish = bool(True)
+publish = bool(False)
 
 
 # INITIALISE THE THROTTLE AND STEERING Cmds
 throttleCmd = 0.0
 steeringCmd = 0.0
 steeringGain = 0.0
+
+def startCallback(msg):
+    global publish
+    
+    if msg.data == "i":
+        publish = bool(True)
+        # rospy.loginfo("publish, %s", publish)
 
 
 def pidCallback(msg):
@@ -77,7 +84,9 @@ def pidCallback(msg):
     lastError = error
     previousTime = currentTime
 
-
+    # if msg.data == "i":
+    #     publish = bool(True)
+    #     rospy.loginfo("publish: %s", publish)
 
     # output conditions need to be modified
     ###################################
@@ -116,16 +125,6 @@ def pidCallback(msg):
         # rospy.loginfo("throttle: %.2f", throttleCmd)
         # rospy.loginfo("steering: %.2f\n", steeringCmd)
 
-    # elif msg.data == "n":
-    #     throttleCmd = 0.0
-    #     steeringCmd = 0.0
-    #     publishCmdJetracer(throttleCmd, steeringCmd)
-    #     # rospy.on_shutdown(pidCallback)
-    #     # rospy.on_shutdown(main)
-    #     rospy.loginfo("vehicle has been stopped")
-    #     rospy.loginfo("throttle: %.2f", throttleCmd)
-    #     rospy.loginfo("steering: %.2f\n", steeringCmd)
-    ###################################
 
 def stopCallback(msg):
     global throttleCmd, steeringCmd
@@ -134,15 +133,13 @@ def stopCallback(msg):
         publish = bool(False)
         rospy.loginfo("publish: %s", publish)
         
-        # rospy.on_shutdown(main())
+
         throttleCmd = 0.0
         steeringCmd = 0.0
         publishCmdJetracer(throttleCmd, steeringCmd)
         rospy.loginfo("vehicle has been stopped")
         rospy.loginfo("throttle: %.2f", throttleCmd)
         rospy.loginfo("steering: %.2f\n", steeringCmd)
-        # rospy.on_shutdown(pidCallback)
-
 
 
 def publishCmdJetracer(throttleCmd, steeringCmd): # publish function
@@ -169,6 +166,7 @@ def main():
     # *ADD* create the subscriber to the keyboard node
     keyTopic = rospy.get_param("/jetRacerDriveNode/keyboard_topic")
     rospy.Subscriber(keyTopic, String, stopCallback)
+    rospy.Subscriber(keyTopic, String, startCallback)
 
     # # Get topic name from the yaml file 
     # (just a topic title, doesn't include anything)

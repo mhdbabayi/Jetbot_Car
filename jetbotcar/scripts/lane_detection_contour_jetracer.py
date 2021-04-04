@@ -135,9 +135,10 @@ cv2.createTrackbar('Contrast', 'Image',
                    240, 2 * 127,
                    brightness_contrast)
 
-def keyCallback(msg):
-    if msg.data == "i":
-        rospy.loginfo("init vehicle")
+# ####################
+# def keyCallback(msg):
+    # if msg.data == "i":
+    #     rospy.loginfo("init vehicle")
     # elif msg.data == "n":
     #     rospy.loginfo("stop vehicle")
 
@@ -149,8 +150,8 @@ def detect_contour():
     pub= rospy.Publisher('lateral_error', Float64, queue_size=5)
 
     # *ADD* create the subscriber to the keyboard node
-    keyTopic = rospy.get_param("/jetRacerDriveNode/keyboard_topic")
-    rospy.Subscriber(keyTopic, String, keyCallback)
+    # keyTopic = rospy.get_param("/jetRacerDriveNode/keyboard_topic")
+    # rospy.Subscriber(keyTopic, String, keyCallback)
 
 
 
