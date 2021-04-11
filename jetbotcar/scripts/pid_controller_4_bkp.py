@@ -8,7 +8,7 @@ from jetbotcar.msg import jetErrorMsg # float64 lateralError
 import rospy
 import time
 
-from std_msgs.msg import Float64, String, Float32MultiArray
+from std_msgs.msg import Float64, String
 
 ######
 import sys
@@ -17,10 +17,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 #PID CONTROL PARAMS
-kp = 2.75#  #0.0035
-ki = 0.2
+kp = 1 # 1 
 kd = 0.0 # 0.5 preiously
-
+ki = 0.0
 
 lastError = 0.0
 publish = bool(False)
@@ -34,22 +33,10 @@ steeringCmd = 0.0
 steeringGain = 0.0
 
 def startCallback(msg):
-    rospy.loginfo("startstopCallback")
     global publish
     if msg.data == "i":
         publish = bool(True)
         rospy.loginfo("operating racer car now")
-    elif msg.data == "n":
-        publish = bool(False)
-        rospy.loginfo("publish: %s", publish)
-        
-
-        throttleCmd = 0.0
-        steeringCmd = 0.0
-        publishCmdJetracer(throttleCmd, steeringCmd)
-        rospy.loginfo("Racer car has been stopped")
-        rospy.loginfo("throttle: %.2f", throttleCmd)
-        rospy.loginfo("steering: %.2f\n", steeringCmd)
 
 
 def pidCallback(msg):
@@ -70,22 +57,21 @@ def pidCallback(msg):
 
     
 
-    lateralErrorCmd = msg.data[0] # assign error messages from image processing to lateralError
-    headingErrorCmd = msg.data[1] 
+    lateralErrorCmd = msg.data # assign error messages from image processing to lateralError
     # Time stamp
-    #print("Error: %.2f, Heading: %.2f" % (lateralErrorCmd, headingErrorCmd))
+
     currentTime = rospy.get_time()
     elapsedTime = currentTime - previousTime
     
     # Compute all the working error variables, careful with the sign convension
-    error = lateralErrorCmd/1000.0 #lateral error is the error input from image processing
+    error = lateralErrorCmd #lateral error is the error input from image processing
     cumError = cumError + error * elapsedTime
     # cumError = integrate.quad(error, 0, 0.1)
     rateError = (error - lastError)/elapsedTime
     
     # PID output computation
     pidOutput_original = (kp * error + ki * cumError + kd * rateError)
-    pidOutput = (kp * error + ki * cumError + kd * rateError) 
+    pidOutput = (kp * error + ki * cumError + kd * rateError)* 0.01 
 
 
     # rospy.loginfo("Current time: %.2f", currentTime)
@@ -101,65 +87,59 @@ def pidCallback(msg):
     lastError = error
     previousTime = currentTime
 
-    throttleCmd = -0.4
-    steeringCmd = pidOutput
     
     # output conditions need to be modified
     ###################################
-    # if pidOutput > 0.0 and pidOutput < 1.0:
-    #     throttleCmd = -0.4
-    #     steeringCmd = pidOutput
+    if pidOutput > 0.0 and pidOutput < 1.0:
+        throttleCmd = -0.4
+        steeringCmd = pidOutput
         
-    # elif pidOutput > 1.0 and pidOutput < 1000.0:
-    #     throttleCmd = -0.4
-    #     steeringCmd = 0.9 # saturation the max steering, condition need further calibration
+    elif pidOutput > 1.0 and pidOutput < 1000.0:
+        throttleCmd = -0.4
+        steeringCmd = 0.9 # saturation the max steering, condition need further calibration
 
-    # elif pidOutput > -1.0 and pidOutput < 0.0:
-    #     throttleCmd = -0.4
-    #     steeringCmd = pidOutput
+    elif pidOutput > -1.0 and pidOutput < 0.0:
+        throttleCmd = -0.4
+        steeringCmd = pidOutput
 
-    # elif pidOutput < -1.0:
-    #     throttleCmd = -0.4
-    #     steeringCmd = -0.9 # saturation the max steering, condition need further calibration
+    elif pidOutput < -1.0:
+        throttleCmd = -0.4
+        steeringCmd = -0.9 # saturation the max steering, condition need further calibration
 
-    # elif pidOutput == 0.0:
-    #     throttleCmd = -0.4
-    #     steeringCmd = pidOutput
-    # # no lane detection message output, 
-    # # the car will stop moving and waiting to be put back on track
-    # # elif error == 1234.0: 
-    # #     throttleCmd = 0.0
-    # #     steeringCmd = 0.0
+    elif pidOutput == 0.0:
+        throttleCmd = -0.4
+        steeringCmd = pidOutput
+    # no lane detection message output, 
+    # the car will stop moving and waiting to be put back on track
+    # elif error == 1234.0: 
+    #     throttleCmd = 0.0
+    #     steeringCmd = 0.0
     
-    # else:
-    #     publish = bool(False)
+    else:
+        publish = bool(False)
 
     if publish:
-        
         # rospy.loginfo("publish: %s", publish)
         publishCmdJetracer(throttleCmd, steeringCmd)
-    else:
-        # pass
-        # publish = bool(False)
-        publishCmdJetracer(0, 0)
+
         # rospy.loginfo("throttle: %.2f", throttleCmd)
         # rospy.loginfo("steering: %.2f\n", steeringCmd)
 
 
-# def stopCallback(msg):
-#     global throttleCmd, steeringCmd
-#     global publish 
-#     if msg.data == "n":
-#         publish = bool(False)
-#         rospy.loginfo("publish: %s", publish)
+def stopCallback(msg):
+    global throttleCmd, steeringCmd
+    global publish 
+    if msg.data == "n":
+        publish = bool(False)
+        rospy.loginfo("publish: %s", publish)
         
 
-#         throttleCmd = 0.0
-#         steeringCmd = 0.0
-#         publishCmdJetracer(throttleCmd, steeringCmd)
-#         rospy.loginfo("Racer car has been stopped")
-#         rospy.loginfo("throttle: %.2f", throttleCmd)
-#         rospy.loginfo("steering: %.2f\n", steeringCmd)
+        throttleCmd = 0.0
+        steeringCmd = 0.0
+        publishCmdJetracer(throttleCmd, steeringCmd)
+        rospy.loginfo("Racer car has been stopped")
+        rospy.loginfo("throttle: %.2f", throttleCmd)
+        rospy.loginfo("steering: %.2f\n", steeringCmd)
 
 
 def publishCmdJetracer(throttleCmd, steeringCmd): # publish function
@@ -168,7 +148,7 @@ def publishCmdJetracer(throttleCmd, steeringCmd): # publish function
     drive_msg = jetRacerDriveMsg()
     drive_msg.throttle = throttleCmd
     drive_msg.steering = steeringCmd
-    drive_pub.publish(drive_msg)
+    drive_pub.publish(drive_msg) #
     
 
 def main():
@@ -182,28 +162,26 @@ def main():
     # initialise pid_controller node
     rospy.init_node("pid_controller", anonymous=True)
     previousTime = rospy.get_time() # startTime is constant now, stamped straight after init_node
-    rospy.loginfo(previousTime)
-
 
     # subscribes to the lateral_error topic
-    rospy.Subscriber("/lateral_error", Float32MultiArray, pidCallback)
+    rospy.Subscriber("/lateral_error", Float64, pidCallback)
 
     # *ADD* create the subscriber to the keyboard node
     keyTopic = rospy.get_param("/jetRacerDriveNode/keyboard_topic")
+    rospy.Subscriber(keyTopic, String, stopCallback)
     rospy.Subscriber(keyTopic, String, startCallback)
-    # rospy.Subscriber(keyTopic, String, startCallback)
 
     # # Get topic name from the yaml file 
     # (just a topic title, doesn't include anything)
     driveTopic = rospy.get_param("/jetRacerDriveNode/jetracer_drive_topic")
 
     # jetRacerDriveMsg contains throttle and steering cmds
-    drive_pub = rospy.Publisher(driveTopic,jetRacerDriveMsg, queue_size=0)
+    drive_pub = rospy.Publisher(driveTopic,jetRacerDriveMsg, queue_size=10)
 
     # try plot 
     cmdPlt_pub = rospy.Publisher("cmdPlt", Float64, queue_size=10)
     
-    rate = rospy.Rate(10)
+    rate = rospy.Rate(100)
 
     while not rospy.is_shutdown():
 

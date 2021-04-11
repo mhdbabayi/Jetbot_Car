@@ -75,6 +75,9 @@ public:
         diff_drive_pub.publish(diffdrivemsg);
     }*/
 
+
+
+
     /* publishing function */
     void publishtoJetracer(double throttle, double steering){
         // jetbotcar::jetRacerDriveMsg jetracerMsg;
@@ -91,11 +94,11 @@ public:
         bool publish = true;
 
         if (msg.data == "w"){
-            throttle = -1.0;
+            throttle = -0.8;
             steering = 0.0;
 
         }else if(msg.data=="s"){
-            throttle = 1.0;
+            throttle = 0.8;
             steering = 0;
 
         }else if(msg.data == "a"){

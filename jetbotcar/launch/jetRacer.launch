@@ -27,7 +27,7 @@
 
 <!-- test -->
 
-  <node pkg="jetbotcar" name="PIDcontroller" type="pid_controller_4.py" output="screen" if="$(arg run_the_robot)">
+  <node pkg="jetbotcar" name="PIDcontroller" type="pid_controller_5.py" output="screen" if="$(arg run_the_robot)">
     <rosparam command="load" file="$(find jetbotcar)/params.yaml"/>
   </node>
 

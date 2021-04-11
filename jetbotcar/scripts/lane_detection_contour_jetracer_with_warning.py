@@ -36,7 +36,7 @@ def gstreamer_pipeline(
         capture_height=480,
         display_width=640,
         display_height=480,
-        framerate=24,
+        framerate=21,
         flip_method=0,
 ):
     return (
@@ -152,9 +152,6 @@ class DetectContour:
 
         self.pub = rospy.Publisher('lateral_error', Float32MultiArray, queue_size=0)
 
-        keyTopic = rospy.get_param("/jetRacerDriveNode/keyboard_topic")
-        rospy.Subscriber(keyTopic, String, self.startCallback)
-
         # *ADD* create the subscriber to the keyboard node
         # keyTopic = rospy.get_param("/jetRacerDriveNode/keyboard_topic")
         # rospy.Subscriber(keyTopic, String, keyCallback)
@@ -164,16 +161,6 @@ class DetectContour:
         self.cam = cv2.VideoCapture(gstreamer_pipeline(flip_method=0), cv2.CAP_GSTREAMER)
 
         self.warped_img_show = []
-
-        self.prev_error_distance = 0
-        self.prev_msg = Float32MultiArray(data=[0, 0])
-
-    def startCallback(self,msg):
-        if msg.data == "i":
-            pass
-        elif msg.data == "n":
-            rospy.loginfo("prev_error_distance reset")
-            self.prev_error_distance = 0
 
     @staticmethod
     def get_heading_error(line):
@@ -185,25 +172,8 @@ class DetectContour:
         x2 = line[2]
         y2 = line[3]
 
-        num = y2 - y1
-        if num > 0:
-            den = x2 - x1
-        else:
-            num = y1 - y2
-            den = x1 - x2
-        if den is not 0:
-            slope = num / den
-            heading = math.degrees(math.atan(slope))
-            # if abs(heading)>90:
-            if heading == 0:
-                return 0
-            sign = -heading / abs(heading)
-            heading = abs(90 - (abs(heading))) * sign
-        else:
-            heading = 0
-
-        # slope = (y2 - y1) / (x2 - x1)
-        return heading
+        slope = (y2 - y1) / (x2 - x1)
+        return slope
 
     # @threaded
     def process_frame(self, frame):
@@ -216,7 +186,7 @@ class DetectContour:
 
         undistorted_img = cv2.remap(frame, map1, map2, interpolation=cv2.INTER_LINEAR,
                                     borderMode=cv2.BORDER_CONSTANT)
-        pts1 = np.float32([[180, 180], [460, 180], [0, 480], [640, 480]])
+        pts1 = np.float32([[180, 220], [460, 220], [0, 480], [640, 480]])
 
         warped_img = warp_image(undistorted_img, pts1, 640, 480)
 
@@ -265,14 +235,16 @@ class DetectContour:
             lefty = int((-x * vy / (vx)) + y)
             righty = int(((cols - x) * vy / (vx)) + y)
             # print("line ", (cols - 1, righty), (0, lefty))
-            line = np.array([0, lefty, cols - 1, righty])
+            line =np.array([0, lefty, cols - 1, righty])
             heading = self.get_heading_error(line.astype(np.float32))
 
-            # img = cv2.line(warped_img, (cols - 1, righty), (0, lefty), (0, 255, 0), 2)
+            img = cv2.line(warped_img, (cols - 1, righty), (0, lefty), (0, 255, 0), 2)
             # cv2.imshow('fitline', img)
 
+
+
             # cv2.rectangle(warped_img, (x, y), (x + w, y + h), (0, 255, 0), 2)
-            # cv2.drawContours(warped_img, c, -1, (0, 255, 0), thickness=1)
+            cv2.drawContours(warped_img, c, -1, (0, 255, 0), thickness=1)
 
             M = cv2.moments(c)
             if M["m00"] == 0:
@@ -294,30 +266,20 @@ class DetectContour:
             # righty = int(((width1 - x) * vy / vx) + y)
             # img = cv2.line(warped_img, (width1, righty), (0, lefty), (255, 0, 0), thickness=1)
 
-            if abs(self.prev_error_distance - error_distance) > 320:
-                rospy.loginfo("Max Limit in detection")
-                error_distance = self.prev_error_distance
-            self.prev_error_distance = error_distance
-
-            msg = Float32MultiArray(data=[error_distance, heading])
-
-            self.prev_msg = msg
-
-            self.pub.publish(msg)
+            self.pub.publish(error_distance)
 
             # rospy.loginfo(cX-320)
 
         else:
-            self.pub.publish(self.prev_msg)
             rospy.loginfo("No line detected")
-            # self.pub.publish(1234)
+            self.pub.publish(1234)
 
         end_time = time.time()
         # print('duration1',(end_time-start_time)*1000)
 
-        self.warped_img_show.append(warped_img)
+        # self.warped_img_show.append(warped_img)
 
-        # cv2.imshow('Image', warped_img)
+        cv2.imshow('Image', warped_img)
         # cv2.imshow('undistorted', frame)
 
         # cv2.imshow('Crop Image', cropped_image)
@@ -344,8 +306,8 @@ class DetectContour:
 
                 self.process_frame(frame)
 
-                for image in self.warped_img_show:
-                    cv2.imshow('Image', self.warped_img_show.pop(0))
+                # for image in self.warped_img_show:
+                #     cv2.imshow('Image', self.warped_img_show.pop(0))
 
                 if (cv2.waitKey(1) & 0xFF == 27):
                     break
