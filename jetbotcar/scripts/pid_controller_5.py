@@ -17,7 +17,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 #PID CONTROL PARAMS
-kp = 2.75#  #0.0035
+kp = 2.8#  #0.0035
 ki = 0.2
 kd = 0.0 # 0.5 preiously
 
@@ -33,7 +33,7 @@ throttleCmd = 0.0
 steeringCmd = 0.0
 steeringGain = 0.0
 
-def startCallback(msg):
+def startstopCallback(msg):
     rospy.loginfo("startstopCallback")
     global publish
     if msg.data == "i":
@@ -101,10 +101,19 @@ def pidCallback(msg):
     lastError = error
     previousTime = currentTime
 
-    throttleCmd = -0.4
-    steeringCmd = pidOutput
+    # throttleCmd = -0.4
+    # steeringCmd = pidOutput
+
+    if headingErrorCmd > 40:
+        throttleCmd = -0.3
+        steeringCmd = pidOutput
+    elif headingErrorCmd < -40:
+        throttleCmd = -0.3
+        steeringCmd = pidOutput
+    else:
+        throttleCmd = -0.9
+        steeringCmd = pidOutput
     
-    # output conditions need to be modified
     ###################################
     # if pidOutput > 0.0 and pidOutput < 1.0:
     #     throttleCmd = -0.4
@@ -190,7 +199,7 @@ def main():
 
     # *ADD* create the subscriber to the keyboard node
     keyTopic = rospy.get_param("/jetRacerDriveNode/keyboard_topic")
-    rospy.Subscriber(keyTopic, String, startCallback)
+    rospy.Subscriber(keyTopic, String, startstopCallback)
     # rospy.Subscriber(keyTopic, String, startCallback)
 
     # # Get topic name from the yaml file 
