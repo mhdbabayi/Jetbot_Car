@@ -9,7 +9,7 @@ from jetbotcar.msg import Jetdrivemsg
 def set_speed(motor_ID, value):
     max_pwm = 115.0
     speed = int(min(max(abs(value*max_pwm), 0), max_pwm))
-
+    
     if motor_ID == 1:
         motor = motor_left
     elif motor_ID == 2:
@@ -59,14 +59,9 @@ if __name__ == "__main__":
     motor_right = motor_driver.getMotor(motor_right_ID)
 
     all_stop()
-
-    rospy.init_node('motorDriveNode')
-    
+    rospy.init_node('motorDriveNode')    
     drive_topic = rospy.get_param("/motorDriveNode/diff_drive_topic")
-
-
     rospy.Subscriber(drive_topic, Jetdrivemsg, driveCallback)
 
     rospy.spin()
-
     all_stop()

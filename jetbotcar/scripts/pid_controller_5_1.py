@@ -17,14 +17,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 #PID CONTROL PARAMS
-kp = 2.8#  #0.0035
-ki = 0.2
-kd = 0.0 # 0.5 preiously
+# kp = 2.7#  #0.0035
+# ki = 0.05
+# kd = 0.5 # 0.5 preiously
 
-
-lastError = 0.0
-publish = bool(False)
-
+kp = 3#  #0.0035
+ki = 0.05
+kd = 0.5# 0.5 preiously
 
 # INITIALISE THE THROTTLE AND STEERING Cmds
 pidOutput = 0.0
@@ -32,6 +31,12 @@ pidOutput_original = 0.0
 throttleCmd = 0.0
 steeringCmd = 0.0
 steeringGain = 0.0
+cumError = 0.0
+lastError = 0.0
+
+
+windupMax = 2.0
+publish = bool(False)
 
 def startstopCallback(msg):
     rospy.loginfo("startstopCallback")
@@ -54,10 +59,9 @@ def startstopCallback(msg):
 
 def pidCallback(msg):
 
-    # global startTime
     global previousTime
     global currentTime
-    # global cumError
+    global cumError
     global lastError
     # global lateralError
 
@@ -66,36 +70,41 @@ def pidCallback(msg):
     global publish
     global pidOutput
     global pidOutput_original
-    cumError = 0.0
-
-    
+    global windupMax
 
     lateralErrorCmd = msg.data[0] # assign error messages from image processing to lateralError
     headingErrorCmd = msg.data[1] 
+
     # Time stamp
-    #print("Error: %.2f, Heading: %.2f" % (lateralErrorCmd, headingErrorCmd))
     currentTime = rospy.get_time()
     elapsedTime = currentTime - previousTime
     
     # Compute all the working error variables, careful with the sign convension
-    error = lateralErrorCmd/1000.0 #lateral error is the error input from image processing
-    cumError = cumError + error * elapsedTime
-    # cumError = integrate.quad(error, 0, 0.1)
+    error = lateralErrorCmd/1000.0
+    cumError += error * elapsedTime
     rateError = (error - lastError)/elapsedTime
     
+
+    #  anti-windup for integral item
+    if cumError > windupMax:
+        cumError = windupMax
+    elif cumError < - windupMax:
+        cumError = windupMax
+
     # PID output computation
     pidOutput_original = (kp * error + ki * cumError + kd * rateError)
     pidOutput = (kp * error + ki * cumError + kd * rateError) 
 
-
+    ##########
+    # print check codes
     # rospy.loginfo("Current time: %.2f", currentTime)
-    # rospy.loginfo("Elapsed time: %.2f", elapsedTime)
+    rospy.loginfo("Elapsed time: %.2f", elapsedTime)
     # rospy.loginfo("lateral error: %.2f", error)
-    # rospy.loginfo("Cumulative Error: %.2f", cumError)
-    # rospy.loginfo("rate error: %.2f", rateError)
+    rospy.loginfo("Cumulative Error: %.2f", cumError)
+    rospy.loginfo("rate error: %.2f\n", rateError)
     # rospy.loginfo("PID pidOutput: %.2f", pidOutput_original)
     # rospy.loginfo("PID scaled output: %.2f\n", pidOutput)
-
+    #########
 
     # Remember some variables for next time
     lastError = error
@@ -105,43 +114,15 @@ def pidCallback(msg):
     # steeringCmd = pidOutput
 
     if headingErrorCmd > 30:
-        throttleCmd = -0.38
+        throttleCmd = -0.35
         steeringCmd = pidOutput
     elif headingErrorCmd < -30:
-        throttleCmd = -0.38
+        throttleCmd = -0.35
         steeringCmd = pidOutput
     else:
-        throttleCmd = -0.5
+        throttleCmd = -0.7
         steeringCmd = pidOutput
     
-    ###################################
-    # if pidOutput > 0.0 and pidOutput < 1.0:
-    #     throttleCmd = -0.4
-    #     steeringCmd = pidOutput
-        
-    # elif pidOutput > 1.0 and pidOutput < 1000.0:
-    #     throttleCmd = -0.4
-    #     steeringCmd = 0.9 # saturation the max steering, condition need further calibration
-
-    # elif pidOutput > -1.0 and pidOutput < 0.0:
-    #     throttleCmd = -0.4
-    #     steeringCmd = pidOutput
-
-    # elif pidOutput < -1.0:
-    #     throttleCmd = -0.4
-    #     steeringCmd = -0.9 # saturation the max steering, condition need further calibration
-
-    # elif pidOutput == 0.0:
-    #     throttleCmd = -0.4
-    #     steeringCmd = pidOutput
-    # # no lane detection message output, 
-    # # the car will stop moving and waiting to be put back on track
-    # # elif error == 1234.0: 
-    # #     throttleCmd = 0.0
-    # #     steeringCmd = 0.0
-    
-    # else:
-    #     publish = bool(False)
 
     if publish:
         
@@ -154,21 +135,6 @@ def pidCallback(msg):
         # rospy.loginfo("throttle: %.2f", throttleCmd)
         # rospy.loginfo("steering: %.2f\n", steeringCmd)
 
-
-# def stopCallback(msg):
-#     global throttleCmd, steeringCmd
-#     global publish 
-#     if msg.data == "n":
-#         publish = bool(False)
-#         rospy.loginfo("publish: %s", publish)
-        
-
-#         throttleCmd = 0.0
-#         steeringCmd = 0.0
-#         publishCmdJetracer(throttleCmd, steeringCmd)
-#         rospy.loginfo("Racer car has been stopped")
-#         rospy.loginfo("throttle: %.2f", throttleCmd)
-#         rospy.loginfo("steering: %.2f\n", steeringCmd)
 
 
 def publishCmdJetracer(throttleCmd, steeringCmd): # publish function

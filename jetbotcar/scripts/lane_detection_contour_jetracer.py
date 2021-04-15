@@ -150,7 +150,7 @@ class DetectContour:
     def __init__(self):
         rospy.init_node('image_processing', anonymous=True)
 
-        self.pub = rospy.Publisher('lateral_error', Float32MultiArray, queue_size=0)
+        self.pub = rospy.Publisher('Error_msg', Float32MultiArray, queue_size=0)
 
         keyTopic = rospy.get_param("/jetRacerDriveNode/keyboard_topic")
         rospy.Subscriber(keyTopic, String, self.startCallback)
