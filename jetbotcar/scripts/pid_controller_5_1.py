@@ -22,8 +22,13 @@ import matplotlib.pyplot as plt
 # kd = 0.5 # 0.5 preiously
 
 kp = 3#  #0.0035
-ki = 0.05
-kd = 0.5# 0.5 preiously
+ki = 0.115
+kd = 0.125# 0.5 preiously
+
+# kp = 2.3#  #0.0035
+# ki = 0.0
+# kd = 0.0# 0.5 preiously
+
 
 # INITIALISE THE THROTTLE AND STEERING Cmds
 pidOutput = 0.0
@@ -35,7 +40,7 @@ cumError = 0.0
 lastError = 0.0
 
 
-windupMax = 2.0
+windupMax = 1.0
 publish = bool(False)
 
 def startstopCallback(msg):
@@ -98,10 +103,10 @@ def pidCallback(msg):
     ##########
     # print check codes
     # rospy.loginfo("Current time: %.2f", currentTime)
-    rospy.loginfo("Elapsed time: %.2f", elapsedTime)
+    # rospy.loginfo("Elapsed time: %.2f", elapsedTime)
     # rospy.loginfo("lateral error: %.2f", error)
-    rospy.loginfo("Cumulative Error: %.2f", cumError)
-    rospy.loginfo("rate error: %.2f\n", rateError)
+    # rospy.loginfo("Cumulative Error: %.2f", cumError)
+    # rospy.loginfo("rate error: %.2f\n", rateError)
     # rospy.loginfo("PID pidOutput: %.2f", pidOutput_original)
     # rospy.loginfo("PID scaled output: %.2f\n", pidOutput)
     #########
@@ -110,17 +115,20 @@ def pidCallback(msg):
     lastError = error
     previousTime = currentTime
 
-    # throttleCmd = -0.4
-    # steeringCmd = pidOutput
-
-    if headingErrorCmd > 30:
-        throttleCmd = -0.35
+    steeringCmd = pidOutput
+    throttleCmd = -0.55
+    # throttleCmd = -1.0
+    # steeringCmd = 0.0
+    
+    
+    if headingErrorCmd > 40:
+        throttleCmd = -0.45
         steeringCmd = pidOutput
-    elif headingErrorCmd < -30:
-        throttleCmd = -0.35
+    elif headingErrorCmd < -40:
+        throttleCmd = -0.45
         steeringCmd = pidOutput
     else:
-        throttleCmd = -0.7
+        throttleCmd = -0.52
         steeringCmd = pidOutput
     
 

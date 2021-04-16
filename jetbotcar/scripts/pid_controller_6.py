@@ -129,7 +129,7 @@ def pidCallback(msg):
         
         throttle_error = throttle_ref - throttleCmd_pid
         print("throttleCmd_pid: %.2f" % throttleCmd_pid)
-        throttleCmd_pid = sorted((0.34, longitudinal_pid.update(throttle_error), 0.9))[1]
+        throttleCmd_pid = sorted((0.4, longitudinal_pid.update(throttle_error), 0.7))[1]
         # throttleCmd_pid = longitudinal_pid.update(throttle_error)
 
         print("throttleCmd: %.2f  heading_error: %.2f throttle_ref: %.2f Ci: %.2f\n" % (
