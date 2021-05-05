@@ -104,7 +104,7 @@ def pidCallback(msg):
     # print check codes
     # rospy.loginfo("Current time: %.2f", currentTime)
     # rospy.loginfo("Elapsed time: %.2f", elapsedTime)
-    # rospy.loginfo("lateral error: %.2f", error)
+    rospy.loginfo("lateral error: %.2f", lateralErrorCmd)
     # rospy.loginfo("Cumulative Error: %.2f", cumError)
     # rospy.loginfo("rate error: %.2f\n", rateError)
     # rospy.loginfo("PID pidOutput: %.2f", pidOutput_original)
@@ -115,21 +115,21 @@ def pidCallback(msg):
     lastError = error
     previousTime = currentTime
 
-    steeringCmd = pidOutput
+    # steeringCmd = pidOutput
+    # throttleCmd = -0.55
     throttleCmd = -0.55
-    # throttleCmd = -1.0
-    # steeringCmd = 0.0
+    steeringCmd = 1.0
     
     
-    if headingErrorCmd > 40:
-        throttleCmd = -0.45
-        steeringCmd = pidOutput
-    elif headingErrorCmd < -40:
-        throttleCmd = -0.45
-        steeringCmd = pidOutput
-    else:
-        throttleCmd = -0.52
-        steeringCmd = pidOutput
+    # if headingErrorCmd > 40:
+    #     throttleCmd = -0.45
+    #     steeringCmd = pidOutput
+    # elif headingErrorCmd < -40:
+    #     throttleCmd = -0.45
+    #     steeringCmd = pidOutput
+    # else:
+    #     throttleCmd = -0.52
+    #     steeringCmd = pidOutput
     
 
     if publish:
@@ -190,7 +190,7 @@ def main():
     rate = rospy.Rate(10)
 
     while not rospy.is_shutdown():
-        cmdlateral_pub.publish(pidOutput_original)
+        cmdlateral_pub.publish(steeringCmd)
         cmdlong_pub.publish(throttleCmd)
         # rospy.loginfo("PID scaled output: %.2f\n", pidOutput_original)
         rate.sleep()

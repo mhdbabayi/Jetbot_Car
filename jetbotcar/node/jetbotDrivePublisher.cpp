@@ -102,11 +102,11 @@ public:
             steering = 0;
 
         }else if(msg.data == "a"){
-            throttle = -0.5;
+            throttle = -0.55;
             steering = -1;
 
         }else if(msg.data == "d") {
-            throttle = -0.5;
+            throttle = -0.55;
             steering = 1;
         }else if (msg.data ==" "){
             throttle = 0.0;

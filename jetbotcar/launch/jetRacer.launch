@@ -25,11 +25,11 @@
     <rosparam command="load" file="$(find jetbotcar)/params.yaml"/>
   </node>
 
-<!-- test -->
+<!-- test  -->
 
   <node pkg="jetbotcar" name="PIDcontroller" type="pid_controller_5_1.py" output="screen" if="$(arg run_the_robot)">
     <rosparam command="load" file="$(find jetbotcar)/params.yaml"/>
-  </node>
+  </node>  
 
   <node pkg="jetbotcar" name="LaneDetection" type="lane_detection_contour_jetracer.py" output="screen" if="$(arg run_the_robot)">
     <rosparam command="load" file="$(find jetbotcar)/params.yaml"/>

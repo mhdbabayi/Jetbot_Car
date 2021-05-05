@@ -77,11 +77,11 @@ class PID:
 rospy.init_node("pid_controller", anonymous=True)
 
 # Creating objects for lateral and longitudinal control
-lateral_pid = PID(2.75, 0.1, 0)
+lateral_pid = PID(3.0, 0.115, 0.125)
 # longitudinal_pid = PID(0.8, 2, 0.0)
-longitudinal_pid = PID(1.3, 0.2, 0.0)
+longitudinal_pid = PID(0.9, 0.2, 0.0)
 #Offset to reduce initial acceleration for passenger comfort
-Integral_offset = -1
+Integral_offset = 0.0
 
 #Giving initial value for Ci as -1 so that initially jetracer will slowly build acceleration
 longitudinal_pid.Ci = Integral_offset
@@ -116,14 +116,14 @@ def pidCallback(msg):
     #Heading error published from Image processing
     heading_error = msg.data[1]
 
-    throttleCmd = -0.4
-
+    throttleCmd = -0.5
+    
     if publish:
         #Steering command for the lateral control which has to be updated for each lateral error subscribed
         steeringCmd = lateral_pid.update(lateral_error)
         #
         pidOutput_original = steeringCmd
-
+        
         
         throttle_ref = sorted((0.4,map_range([0, 90], [1, 0], abs(heading_error)), 0.7))[1]
         
